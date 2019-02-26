@@ -1,42 +1,105 @@
+<!-- background-image: linear-gradient(to bottom right, LightCoral, white); -->
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-  	<style>
-  	#head_1{
-  		text-align: center;
-  		font-size: 40px;
-  		border-bottom: 6px groove;
-  		margin-top: 0px;
-  		margin-right: 0px;
-  		margin-left: 0px;
-  		background-image: linear-gradient(to bottom right, LightCoral, white);
-  	}
-  	body{
-  		background-color: LightCoral;
-  		text-align: center;
-
-  	}
-  	p{
-  		margin: auto;
-  		align-self: center;
-  		width: 50%;
-
-  	}
-  	#body_1{
-  		border-bottom: 6px groove;
-  	}
-  		
-
-  	</style>
-    <meta charset="utf-8">
-    <title>CSCE 482Diversity Mining</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename="js/loadfn.js")}}"></script>
+    <style>
+      #head_1 {
+        text-align: center;
+        font-size: 40px;
+        margin-top: 0px;
+        margin-right: 0px;
+        margin-left: 0px;
+      }
+      #home-div {
+        background-color: cornflowerblue;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .back-gray {
+        background-color: whitesmoke;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .white-text {
+        color: white;
+      }
+      .center {
+        margin: auto;
+        width: 50%;
+        padding: 10px;
+      }
+      .button-white {
+        color: #fff;
+        background-color: transparent;
+        background-image: none;
+        border-color: #fff !important;
+        border: 2px solid transparent;
+        padding: 0.375rem 0.75rem;
+        font-size: 22px;
+        font-weight: 600;
+      }
+      .button-white:hover {
+        background-color: black;
+      }
+      body {
+        text-align: center;
+      }
+      p {
+        margin: auto;
+        align-self: center;
+        width: 50%;
+      }
+      .center-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+    <meta charset="utf-8" />
+    <title>Diversity Mining</title>
   </head>
   <body>
-    <h1 id = "head_1"> CSCE 482 Diversity Mining </h1>
-    <p id = "body_1"> In this project we aim to create diversity scores for fortune 500 companies. We are doing this by creating a dictionary of diversity-related words and phrases and using this dictionary to score each company. We are then going to use these scores to predict financial performance for the companies. </p>
-    <br>
-    <p id = "body_2">
-    	This website is currently just a skeleton, more will be coming in the future!
-    </p>
+    <input type="file" id="files" name="file" style="display:none" />
+    <div id="home-div">
+      <div style="display: table; height: 400px; overflow: hidden;">
+        <div style="display: table-cell; vertical-align: middle;">
+          <h1 id="head_1" style="color: white">Diversity Mining</h1>
+          <br />
+          <br />
+          <p style="color: white; text-align: center">
+            In this project we aim to create diversity scores for fortune 500
+            companies. We are doing this by creating a dictionary of
+            diversity-related words and phrases and using this dictionary to
+            score each company. We are then going to use these scores to predict
+            financial performance for the companies.
+          </p>
+          <br />
+          <div class="center-content">
+            <button type="button" class="button-white" onclick ="loadcsv()" >Generate Scores</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="back-gray"></div>
   </body>
+
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+    crossorigin="anonymous"
+  />
+  <script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+    integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+    crossorigin="anonymous"
+  ></script>
 </html>
