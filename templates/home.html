@@ -3,11 +3,12 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename="js/loadfn.js")}}"></script>
     <style>
       #home-div {
         background-color: dodgerblue;
         height: 500px;
-
         display: flex;
         align-items: center;
         justify-content: center;
@@ -50,6 +51,7 @@
     <title>Diversity Mining</title>
   </head>
   <body>
+    <input type="file" id="files" name="file" style="display:none" />
     <div id="home-div">
       <div class="container">
         <div class="row justify-content-md-center">
