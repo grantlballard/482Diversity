@@ -12,7 +12,7 @@ function loadcsv() {
 
 /*
     Bind handlesel function to file change
-    Whenever user chooses  file it 
+    Whenever user chooses  file it calls handlesel
 
 */
 $(document).on("change" ,"#files" ,function(){handlesel();});
