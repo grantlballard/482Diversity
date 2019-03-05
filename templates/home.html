@@ -6,15 +6,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename="js/loadfn.js")}}"></script>
     <style>
-      #head_1 {
-        text-align: center;
-        font-size: 40px;
-        margin-top: 0px;
-        margin-right: 0px;
-        margin-left: 0px;
-      }
       #home-div {
-        background-color: cornflowerblue;
+        background-color: dodgerblue;
         height: 500px;
         display: flex;
         align-items: center;
@@ -22,18 +15,15 @@
       }
       .back-gray {
         background-color: whitesmoke;
-        height: 500px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        height: 300px;
+        padding-top: 40px;
       }
       .white-text {
         color: white;
       }
       .center {
-        margin: auto;
-        width: 50%;
-        padding: 10px;
+        margin: 0 auto;
+        display: block;
       }
       .button-white {
         color: #fff;
@@ -56,11 +46,6 @@
         align-self: center;
         width: 50%;
       }
-      .center-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
     </style>
     <meta charset="utf-8" />
     <title>Diversity Mining</title>
@@ -68,27 +53,55 @@
   <body>
     <input type="file" id="files" name="file" style="display:none" />
     <div id="home-div">
-      <div style="display: table; height: 400px; overflow: hidden;">
-        <div style="display: table-cell; vertical-align: middle;">
-          <h1 id="head_1" style="color: white">Diversity Mining</h1>
-          <br />
-          <br />
-          <p style="color: white; text-align: center">
-            In this project we aim to create diversity scores for fortune 500
-            companies. We are doing this by creating a dictionary of
-            diversity-related words and phrases and using this dictionary to
-            score each company. We are then going to use these scores to predict
-            financial performance for the companies.
-          </p>
-          <br />
-          <div class="center-content">
-            <button type="button" class="button-white" onclick ="loadcsv()" >Generate Scores</button>
+      <div class="container">
+        <div class="row justify-content-md-center">
+          <div class="col col-md-auto">
+            <h1 class="text-center" style="color: white">Diversity Mining</h1>
+            <br />
+            <p style="color: white; text-align: center">
+              In this project we aim to create diversity scores for fortune 500
+              companies. We are doing this by creating a dictionary of
+              diversity-related words and phrases and using this dictionary to
+              score each company. We are then going to use these scores to
+              predict financial performance for the companies.
+            </p>
+            <br />
+            <br />
+            <button type="button" class="button-white center">
+              Generate Scores
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="back-gray"></div>
+    <div class="back-gray">
+      <div class="container">
+        <div class="row justify-content-md-center">
+          <div class="col col-md-auto">
+            <img
+              style="padding-right: 15px"
+              height="150px"
+              src="http://www.iconarchive.com/download/i103757/blackvariant/button-ui-ms-office-2016/Excel-2.ico"
+            />
+          </div>
+          <div class="col col-md-auto d-flex align-content-md-center flex-wrap">
+            <h4>
+              Upload a CSV file containing the dictionary you would like to use
+            </h4>
+          </div>
+        </div>
+        <div class="row justify-content-md-center">
+          <div class="col col-md-auto">
+            <input
+              id="fileSelect"
+              type="file"
+              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 
   <link
