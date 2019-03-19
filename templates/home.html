@@ -1,10 +1,13 @@
-<!-- background-image: linear-gradient(to bottom right, LightCoral, white); -->
+<!-- background-image: linear-gradient(to bottom right, LightCoral, white);
+<script src="{{ url_for('static', filename="js/reactComponent.jsx")}}" type="text/babel"></script>
+-->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename="js/loadfn.js")}}"></script>
+    <script type="text/babel" src="{{ url_for('static', filename="js/reactComponent.js")}}"></script>
 
     <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
@@ -109,16 +112,10 @@
         </div>
       </div>
     </div>
+    <div id="like_button_container"></div>
 
     <div id="root"></div>
-    <script type="text/babel">
 
-      ReactDOM.render(
-        <h1>Hello, world! This is a React Component</h1>,
-        document.getElementById('root')
-      );
-
-    </script>
   </body>
 
   <link
