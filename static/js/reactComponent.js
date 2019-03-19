@@ -1,5 +1,5 @@
 "use strict";
-
+import React from "react";
 let x = 5;
 
 ReactDOM.render(
