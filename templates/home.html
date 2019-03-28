@@ -74,9 +74,11 @@
             </p>
             <br />
             <br />
-            <button type="button" class="button-white center">
-              Generate Scores
-            </button>
+            <form method="post" action="/get_scores">
+            <input type="submit" name="submitbutton" class="button-white center" value="Generate Scores">
+  
+            </input>
+            </form>
           </div>
         </div>
       </div>
@@ -105,6 +107,7 @@
               type="file"
               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             />
+            <button onclick="senddata()">Submit Dictionary</button>
           </div>
         </div>
       </div>

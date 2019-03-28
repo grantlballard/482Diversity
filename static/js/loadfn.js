@@ -1,23 +1,52 @@
-/*
-    Could have made this a 
-    on click fn but oh well
-    just clicks the input which 
-    brings up the user's file browser
-*/
+
 function loadcsv() {
     $("#files").click();
     //$("#files").change();
 }
 
+// Sends the dictionary's contents to the server
+function senddata(){
+    let params = "";
+    var file = document.getElementById("fileSelect").files[0];
+    var start = 0;
+    var stop = file.size - 1;
+    var blob = file.slice(start, stop + 1);
+    console.log(stop)
+    if (file) {
+        var reader = new FileReader();
+        reader.readAsBinaryString(blob);
+        reader.onload = function (evt) {
 
+            var res = evt.target.result;
+            console.log(res);
+            var params = res
+
+            var http = new XMLHttpRequest();
+            var url = '/upload_dict';
+            http.open('POST', url, true);
+ 
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.onreadystatechange = function() {
+                if(http.readyState == 4 && http.status == 200) {
+                    alert(http.responseText);
+                }
+            }
+
+            http.send("test="+params);
+        }
+        reader.onerror = function (evt) {
+            console.log("error reading file");
+        }
+    }
+}
+
+
+// below isn't needed now
 /*
     Bind handlesel function to file change
     Whenever user chooses  file it calls handlesel
-
 */
 $(document).on("change" ,"#files" ,function(){handlesel();});
-
-
 /*
     function to handle the file the user uploaded
     reads in the file's text content, file needs to be a 
@@ -75,4 +104,3 @@ function handlesel() {
     reader.readAsBinaryString(blob);
     return true;
 }
-
