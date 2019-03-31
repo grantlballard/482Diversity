@@ -36,6 +36,7 @@ def tokenized_to_ngram(tokenized_doc, ngram_size=2):
             ngrams.append(new_ngram.strip())
     return ngrams
 
+
 def tf(t, d, log=False):
     """
     Parameters:
