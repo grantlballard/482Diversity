@@ -69,7 +69,6 @@
   </head>
   <body>
     <script src="{{ url_for('static', filename="bundle.js")}}"  type="text/javascript"></script>
-
     <div id="home-div">
       <div class="container">
         <div class="row justify-content-md-center">
@@ -85,9 +84,13 @@
             </p>
             <br />
             <br />
-            <button type="button" class="button-white center">
-              <a href="/results" id="generate-scores-link">Generate Scores </a>
-            </button>
+
+            <form method="post" action="/get_scores">
+            <input type="submit" name="submitbutton" class="button-white center" value="Generate Scores">
+
+            </input>
+            </form>
+
           </div>
         </div>
       </div>
@@ -116,6 +119,7 @@
               type="file"
               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             />
+            <button onclick="senddata()">Submit Dictionary</button>
           </div>
         </div>
       </div>
