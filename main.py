@@ -1,5 +1,6 @@
 from flask import Flask, render_template, json, request, session
-import model
+import diversity_score_model as dsm
+import finance_model as fm
 
 app = Flask(__name__)
 
@@ -11,8 +12,8 @@ company_1_document = "We believe in building diverse teams that are great at com
 company_2_document = "We love teamwork. We believe teamwork is the best way to succeed."
 company_3_document = "Diverse people make our company succeed. It's all about teamwork."
 document_collection = [company_1_document, company_2_document, company_3_document]
-document_collection = [model.tokenize(doc) for doc in document_collection]
-document_collection = [model.tokenized_to_ngram(doc, 2) for doc in document_collection]
+document_collection = [dsm.tokenize(doc) for doc in document_collection]
+document_collection = [dsm.tokenized_to_ngram(doc, 2) for doc in document_collection]
 
 app.secret_key = 'A0Zr98j23yX R~Xav!jmN]LWX@,?RT'
 
@@ -49,7 +50,7 @@ def api_generate_scores():
 	diversity_dictionary = infile.read().split(',')
 	infile.close()
 	print(diversity_dictionary)
-	scores = model.get_collection_diversity_scores(diversity_dictionary, document_collection)
+	scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection)
 	response = []
 	for score in scores:
 	    item = {}
