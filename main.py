@@ -22,7 +22,7 @@ app.secret_key = 'A0Zr98j23yX R~Xav!jmN]LWX@,?RT'
 @app.route("/")
 def api_home():
 	outfile = open('divdict.csv','w')
-	outfile.write("LGBT policies, diversity organization, diverse people")
+	outfile.write("LGBT policies, diversity organization, diverse teams")
 	outfile.close()
 	return render_template("home.html")
 
@@ -42,11 +42,7 @@ def upload_dictionary():
 	return " fail"
 
 
-@app.route("/results")
-def results():
-    return render_template("results.html")
-
-@app.route("/get_scores", methods = ["POST"])
+@app.route("/results", methods = ["POST"])
 def api_generate_scores():
 	infile = open('divdict.csv','r')
 	diversity_dictionary = infile.read().split(',')
@@ -60,8 +56,9 @@ def api_generate_scores():
 	    response.append(item)
 	result = json.dumps(response)
 	result = json.loads(result)
-	print(type(result), file=sys.stderr)
-	return render_template("results.html", resultsJSON=result)
+	resultLength = len(result)
+	print(resultLength, file=sys.stderr)
+	return render_template("results.html", resultsJSON=result, resultsLen=resultLength)
 
 
 

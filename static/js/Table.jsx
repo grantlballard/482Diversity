@@ -3,47 +3,48 @@ import React from "react";
 import ReactTable from "react-table";
 
 export default class Table extends React.Component {
+  stringToJSON(results, resultsLength) {
+    //original string has single quotes and double quotes are needed for correct JSON.parse format
+    for (var i = 0; i < resultsLength; i++) {
+      results = results.replace("'", '"');
+      results = results.replace("'", '"');
+    }
+    results = JSON.parse(results);
+    return results;
+  }
+
   render() {
+    var resultsJSON = this.stringToJSON(
+      this.props.results,
+      this.props.resultsLength
+    );
+
     const data = [
       {
         name: "Tanner Linsley",
-        age: 26,
-        friend: {
-          name: "Jason Maurer",
-          age: 23
-        }
+        score: 34
       },
       {
         name: "Jake Bell",
-        age: 36,
-        friend: {
-          name: "Mason Mills",
-          age: 26
-        }
+        score: 25
       }
     ];
 
     const columns = [
       {
-        Header: "Name",
+        Header: "Company Name",
         accessor: "name" // String-based value accessors!
       },
       {
-        Header: "Age",
-        accessor: "age",
+        Header: "Score",
+        accessor: "score",
         Cell: props => <span className="number">{props.value}</span> // Custom cell components!
-      },
-      {
-        id: "friendName", // Required because our accessor is not a string
-        Header: "Friend Name",
-        accessor: d => d.friend.name // Custom value accessors!
-      },
-      {
-        Header: props => <span>Friend Age</span>, // Custom header components!
-        accessor: "friend.age"
       }
     ];
+    //console.log(resultsJSON);
+    //var res = {{ resultsJSON }};
+    //  console.log(res);
 
-    return <ReactTable data={data} columns={columns} />;
+    return <ReactTable data={resultsJSON} columns={columns} />;
   }
 }

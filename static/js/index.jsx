@@ -5,4 +5,12 @@ import Table from "./Table";
 
 import "react-table/react-table.css";
 
-ReactDOM.render(<Table />, document.getElementById("table-content"));
+ReactDOM.render(
+  <Table
+    results={document.getElementById("table-content").getAttribute("results")}
+    resultsLength={document
+      .getElementById("table-content")
+      .getAttribute("resultsLength")}
+  />,
+  document.getElementById("table-content")
+);
