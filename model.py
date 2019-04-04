@@ -2,6 +2,7 @@ import numpy as np
 import math
 import re
 import string
+import pandas
 
 def tokenized_to_ngram(tokenized_doc, ngram_size=2):
     """
@@ -117,10 +118,12 @@ def get_collection_diversity_scores(diversity_dictionary, document_collection):
         diversity_dictionary -> [string]. List of strings representing the concept of diversity.
         document_colleciton -> [[string]] list of all tokenized company documents.
     Returns:
-        [double]. List of document diversity scores from document_collection
+        tuple(string,double). List of tuples, first element in the tuple is the company name, second is the generated score
     """
     scores = []
-    for document in document_collection:
-        document_score = get_document_diversity_score(diversity_dictionary, document, document_collection)
-        scores.append(document_score)
+    doc_collect = [i[1] for i in document_collection]
+    for name,document in document_collection:
+        document_score = get_document_diversity_score(diversity_dictionary, document, doc_collect)
+        scores.append([name,document_score,"placeholercusip"])
+    scores = pandas.DataFrame(scores, columns = ['comp_name','score','cusip'])
     return scores
