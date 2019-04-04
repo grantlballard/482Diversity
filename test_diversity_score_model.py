@@ -1,5 +1,7 @@
 import pytest
+import pandas as pd
 import diversity_score_model as dsm
+
 
 @pytest.fixture
 def diversity_dictionary():
@@ -30,7 +32,9 @@ def doc_collection(doc):
     """
     doc_2 = "This is an example document uniqueword1"
     doc_3 = "This is an example document uniqueword2"
-    return [doc, doc_2, doc_3]    
+    return [("comp_1", doc), 
+            ("comp_2", doc_2), 
+            ("comp_3", doc_3)]    
 
 
 @pytest.fixture
@@ -50,7 +54,7 @@ def tokenized_doc_collection(doc_collection):
         Type:       [[string]]
         Summary:    List of tokenized documents representing a document collection.
     """
-    return [dsm.tokenize(doc) for doc in doc_collection]
+    return [(comp_name, dsm.tokenize(doc)) for comp_name, doc in doc_collection]
     
 
 def test_tokenize(doc):
@@ -96,7 +100,7 @@ def test_tf(tokenized_doc, term, expected):
     ("non_existant_word", 0)
 ])
 def test_df(tokenized_doc_collection, term, expected):
-    assert dsm.df(term, tokenized_doc_collection) == expected
+    assert dsm.df(term, [doc for comp_name, doc in tokenized_doc_collection]) == expected
 
 
 @pytest.mark.parametrize("term, expected", [
@@ -108,24 +112,31 @@ def test_df(tokenized_doc_collection, term, expected):
     ("non_existant_word", 0)
 ])
 def test_idf(tokenized_doc_collection, term, expected):
-    assert dsm.idf(term, tokenized_doc_collection) == expected
+    assert dsm.idf(term, [doc for comp_name, doc in tokenized_doc_collection]) == expected
 
 
 def test_tf_idf(tokenized_doc, tokenized_doc_collection):
     expected_tf_idf = [1, 1, 1]
     for i, term in enumerate(tokenized_doc):
-        assert dsm.tf_idf(term, tokenized_doc, tokenized_doc_collection) == expected_tf_idf[i]
+        assert dsm.tf_idf(term, tokenized_doc, [doc for comp_name, doc in tokenized_doc_collection]) == expected_tf_idf[i]
 
 
 def test_get_document_diversity_score(diversity_dictionary, tokenized_doc_collection):
     expected_scores = [1, 4, 4]
     for score, doc in zip(expected_scores, tokenized_doc_collection):
-        assert dsm.get_document_diversity_score(diversity_dictionary, doc, tokenized_doc_collection) == score
+        comp_name = doc[0]
+        doc = doc[1]
+        assert dsm.get_document_diversity_score(diversity_dictionary, doc, [doc for comp_name, doc in tokenized_doc_collection]) == score
 
 
 def test_get_collection_diversity_scores(diversity_dictionary, tokenized_doc_collection):
-    expected_scores = [1, 4, 4]
-    assert dsm.get_collection_diversity_scores(diversity_dictionary, tokenized_doc_collection) == expected_scores
+    expected_scores = [ ["comp_1", 1, "placeholercusip"],
+                        ["comp_2", 4, "placeholercusip"], 
+                        ["comp_3", 4, "placeholercusip"]
+                      ]
+    expected_df = pd.DataFrame(expected_scores, columns = ["comp_name", "score", "cusip"])
+    df = dsm.get_collection_diversity_scores(diversity_dictionary, tokenized_doc_collection) == expected_df
+    assert df.all().all()
 
 
 

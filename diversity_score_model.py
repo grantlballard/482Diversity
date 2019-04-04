@@ -126,7 +126,7 @@ def get_collection_diversity_scores(diversity_dictionary, document_collection):
     """
     scores = []
     doc_collect = [i[1] for i in document_collection]
-    for name,document in document_collection:
+    for name, document in document_collection:
         document_score = get_document_diversity_score(diversity_dictionary, document, doc_collect)
         scores.append([name,document_score,"placeholercusip"])
     scores = pandas.DataFrame(scores, columns = ['comp_name','score','cusip'])
