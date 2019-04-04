@@ -96,9 +96,12 @@ def get_document_collection(service, folder_id):
 				if 'fileExtension' in file and file['fileExtension'] == "txt":
 					#print("FILEFOUND")
 					comp_name = file['title'].split('_')[0]
+					
 					#print(comp_name)
 					content = get_file_wrapper(service, child["id"]) 
-					#print(content)
+					content = dsm.tokenize(content)
+					content = dsm.tokenized_to_ngram(content, 2)
+					print("Company Document: {}".format(content))
 					compdict[comp_name] = content
 			page_token = children.get('nextPageToken')
 			if not page_token:
