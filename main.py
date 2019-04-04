@@ -2,7 +2,6 @@ from flask import Flask, render_template, json, request, session
 import diversity_score_model as dsm
 import finance_model as fm
 
-import model
 import os
 import flask
 import requests
@@ -60,7 +59,7 @@ def find_dict(service, folder_id):
       page_token = children.get('nextPageToken')
       if not page_token:
         break
-    except errors.HttpError, error:
+    except errors.HttpError as error:
       print('An error occurred: %s' % error)
       break
 
@@ -93,7 +92,7 @@ def get_docs(service, folder_id):
       page_token = children.get('nextPageToken')
       if not page_token:
         break
-    except errors.HttpError, error:
+    except errors.HttpError as error:
       print('An error occurred: %s' % error)
       break
   print(compdict)
@@ -184,17 +183,15 @@ def oauth2callback():
 def api_generate_scores():
 	if 'credentials' not in flask.session:
 		return flask.redirect('authorize')
+	
+	credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
+	
+	drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-	credentials = google.oauth2.credentials.Credentials(
-    **flask.session['credentials'])
+	files = drive.files().list().execute()
 
-  	drive = googleapiclient.discovery.build(
-    API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-  	files = drive.files().list().execute()
-
-  	folderid = ''
-  	for item  in files['items']:
+	folderid = ''
+	for item  in files['items']:
 		#print item['title']
 		if item['title'] == 'Diversity':
 			#print "success"
@@ -202,12 +199,12 @@ def api_generate_scores():
 
 	diversity_dictionary = find_dict(drive,folderid)
 
-	
+
 
 	print(diversity_dictionary)
 	document_collection = get_docs(drive,folderid)
 	print(document_collection)
-	scores = model.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+	scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
 	return json.dumps(scores.to_json())
 
 
