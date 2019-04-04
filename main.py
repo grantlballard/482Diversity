@@ -53,15 +53,15 @@ def find_dict(service, folder_id):
         file = service.files().get(fileId=child['id']).execute()
         # Check if file is dictionary
         if file['fileExtension'] == "csv":
-          print "DICTIONARY"
+          print("DICTIONARY")
           return service.files().get_media(fileId=child['id']).execute().split(',')
         else:
-          print "SCOREFILE"
+          print("SCOREFILE")
       page_token = children.get('nextPageToken')
       if not page_token:
         break
     except errors.HttpError, error:
-      print 'An error occurred: %s' % error
+      print('An error occurred: %s' % error)
       break
 
 '''
@@ -94,7 +94,7 @@ def get_docs(service, folder_id):
       if not page_token:
         break
     except errors.HttpError, error:
-      print 'An error occurred: %s' % error
+      print('An error occurred: %s' % error)
       break
   print(compdict)
   return compdict
