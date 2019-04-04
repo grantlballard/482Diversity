@@ -22,7 +22,7 @@ API_VERSION = 'v2'
 # Toy diversity dictionary
 diversity_dictionary = ["diverse teams", "diverse people", "love teamwork"]
 app = Flask(__name__)
-app.secret_key = 'AIzaSyAOimggCcG_hvDr-FPQvmwC4YDw-u1iPS8'
+app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
 #app.secret_key = 'A0Zr98j23yX R~Xav!jmN]LWX@,?RT'
 
 # Toy document collection
