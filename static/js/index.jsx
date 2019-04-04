@@ -1,12 +1,12 @@
 // index.jsx
 import React from "react";
 import ReactDOM from "react-dom";
-import Table from "./Table";
+import Results from "./Results";
 
 import "react-table/react-table.css";
 
 ReactDOM.render(
-  <Table
+  <Results
     results={document.getElementById("table-content").getAttribute("results")}
     resultsLength={document
       .getElementById("table-content")
