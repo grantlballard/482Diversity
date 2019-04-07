@@ -7,7 +7,8 @@ import model
 app = Flask(__name__, static_folder="./static/js")
 
 
-
+# Toy diversity dictionary
+diversity_dictionary = ["diverse teams", "diverse people", "love teamwork"]
 
 # Toy document collection
 company_1_document = "We believe in building diverse teams that are great at communication and love teamwork."

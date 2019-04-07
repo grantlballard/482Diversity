@@ -3,6 +3,22 @@ import math
 import re
 import string
 
+def tokenize(d):
+    """
+    Parameters:
+        d -> string. Document or query as raw string
+    Returns:
+        [string]. Tokenized version of 'd'
+    """
+    if not isinstance(d, str):
+        raise TypeError
+
+    punc_space_pattern = r'[\W{} ]+'.format(string.punctuation)
+    d = d.lower() # Lowercase
+    d = re.split(punc_space_pattern, d)            # Split on punctuation and whitespace
+    d = list(filter(lambda tok: len(tok) >= 3, d)) # Remove tokens of size < 3
+    return d
+
 def tokenized_to_ngram(tokenized_doc, ngram_size=2):
     """
     Parameters:
@@ -19,19 +35,6 @@ def tokenized_to_ngram(tokenized_doc, ngram_size=2):
                 new_ngram += tokenized_doc[j] + " "
             ngrams.append(new_ngram.strip())
     return ngrams
-
-def tokenize(d):
-    """
-    Parameters:
-        d -> string. Document or query as raw string
-    Returns:
-        [string]. Tokenized version of 'd'
-    """
-    punc_space_pattern = "[\W{} ]+".format(string.punctuation)
-    d = d.lower() # Lowercase
-    d = re.split(punc_space_pattern, d)            # Split on punctuation and whitespace
-    d = list(filter(lambda tok: len(tok) >= 3, d)) # Remove tokens of size < 3
-    return d
 
 
 def tf(t, d, log=False):
@@ -110,6 +113,7 @@ def get_document_diversity_score(diversity_dictionary, document, document_collec
         diversity_score = tf_idf(term, document, document_collection)
         total_diversity_score += diversity_score
     return total_diversity_score
+
 
 def get_collection_diversity_scores(diversity_dictionary, document_collection):
     """
