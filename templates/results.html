@@ -3,7 +3,7 @@
 
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="{{ url_for('static', filename="Table.jsx")}}" type="text/javascript"></script>
+  <script src="{{ url_for('static', filename="js/Table.jsx")}}" type="text/javascript"></script>
 
   <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
@@ -34,7 +34,7 @@
     <div class="container">
       <div id="table-content" results="{{ resultsJSON }}" resultsLength="{{ resultsLen }}" />
     </div>
-    <script src="{{ url_for('static', filename="bundle.js")}}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
   </div>
 
 </body>
