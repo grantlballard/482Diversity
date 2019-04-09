@@ -1,3 +1,7 @@
+from __future__ import print_function # In python 2.7
+from flask import Flask, render_template, json, request, session
+from apiclient import errors
+from apiclient import http
 
 import sys
 import os
@@ -10,10 +14,7 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 
-from flask import Flask, render_template, json, request, session
-from __future__ import print_function # In python 2.7
-from apiclient import errors
-from apiclient import http
+
 
 CLIENT_SECRETS_FILE = "client_secret.json"
 
