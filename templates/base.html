@@ -14,17 +14,27 @@
 
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+    <link rel="stylesheet" href="{{ url_for('static', filename="css/base.css")}}"></link>
     {% block custom_css %}
     {% endblock %}
 
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <body>
     <!-- navbar -->
     <nav class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="/">Navbar</a>
+        <a class="w3-bar-item w3-button w3-hover-white" href="/">Home</a>
+        <a class="w3-bar-item w3-button w3-hover-white" href="/methods">Methods</a>
+        
+        
+        {% block in_page_nav_links %}
+        {% endblock %}
     </nav>
+
     {% block content %}
     {% endblock %}
 </body>

@@ -171,6 +171,11 @@ def results():
     return render_template("results.html")
 
 
+@app.route("/methods")
+def api_methods():
+	return render_template("methods.html")
+
+
 #oath route, called when the user isn't currently logged into a drive account
 @app.route('/oauth2callback')
 def oauth2callback():
@@ -220,6 +225,8 @@ def api_generate_scores():
 	print(document_collection)
 	scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
 	return scores.to_json()
+
+
 
 
 
