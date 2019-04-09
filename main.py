@@ -1,14 +1,17 @@
-from flask import Flask, render_template, json, request, session
-import diversity_score_model as dsm
-import finance_model as fm
 
+import sys
 import os
 import flask
 import requests
+import diversity_score_model as dsm
+import finance_model as fm
 import pandas as pd
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
+
+from flask import Flask, render_template, json, request, session
+from __future__ import print_function # In python 2.7
 from apiclient import errors
 from apiclient import http
 
@@ -96,9 +99,9 @@ def get_document_collection(service, folder_id):
 				if 'fileExtension' in file and file['fileExtension'] == "txt":
 					#print("FILEFOUND")
 					comp_name = file['title'].split('_')[0]
-					
+
 					#print(comp_name)
-					content = get_file_wrapper(service, child["id"]) 
+					content = get_file_wrapper(service, child["id"])
 					content = dsm.tokenize(content)
 					content = dsm.tokenized_to_ngram(content, 2)
 					print("Company Document: {}".format(content))
@@ -196,9 +199,9 @@ def oauth2callback():
 def api_generate_scores():
 	if 'credentials' not in flask.session:
 		return flask.redirect('authorize')
-	
+
 	credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
-	
+
 	drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 	files = drive.files().list().execute()
