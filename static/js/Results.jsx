@@ -55,6 +55,21 @@ class Results extends React.Component {
     );
     console.log(resultsJSON);
 
+    // converting the json to the approriate formate that is needed for React Table data
+    const numDocuments = Object.keys(resultsJSON["comp_name"]).length;
+    var finalJSON = [];
+    var jsonData = {};
+    for (var i = 0; i < numDocuments; i++) {
+      jsonData = {
+        name: resultsJSON["comp_name"][i],
+        cusip: resultsJSON["cusip"][i],
+        score: resultsJSON["score"][i]
+      };
+      finalJSON.push(jsonData);
+    }
+
+    console.log(finalJSON);
+
     const { classes } = this.props;
     const { value } = this.state;
 
@@ -68,15 +83,14 @@ class Results extends React.Component {
               indicatorColor="primary"
               textColor="primary"
             >
-              <Tab label="Table" />
-              <Tab label="Graphs" />
+              <Tab label="Diversity Scores" />
+              <Tab label="Business Correlations" />
             </Tabs>
           </AppBar>
 
           {// Tab 1 -> the table of results
-          value === 0 && <Table results={resultsJSON} />}
+          value === 0 && <Table results={finalJSON} />}
           {value === 1 && <TabContainer>Item Two</TabContainer>}
-          {value === 2 && <TabContainer>Item Three</TabContainer>}
         </div>
       </div>
     );

@@ -23,19 +23,8 @@ SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 API_SERVICE_NAME = 'drive'
 API_VERSION = 'v2'
 
-# Toy diversity dictionary
-diversity_dictionary = ["diverse teams", "diverse people", "love teamwork"]
 app = Flask(__name__)
 app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
-#app.secret_key = 'A0Zr98j23yX R~Xav!jmN]LWX@,?RT'
-
-# Toy document collection
-company_1_document = "We believe in building diverse teams that are great at communication and love teamwork."
-company_2_document = "We love teamwork. We believe teamwork is the best way to succeed."
-company_3_document = "Diverse people make our company succeed. It's all about teamwork."
-document_collection = [company_1_document, company_2_document, company_3_document]
-document_collection = [dsm.tokenize(doc) for doc in document_collection]
-document_collection = [dsm.tokenized_to_ngram(doc, 2) for doc in document_collection]
 
 folderid = 'Diversity'
 
@@ -167,7 +156,7 @@ def authorize():
 
 
 @app.route("/results")
-def results():
+def api_results():
     return render_template("results.html")
 
 
@@ -224,8 +213,7 @@ def api_generate_scores():
 	document_collection = get_document_collection(drive,folderid)
 	print(document_collection)
 	scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	return scores.to_json()
-
+	return render_template("results.html", resultsJSON=scores.to_json(), resultsLen=2)
 
 
 
