@@ -209,11 +209,19 @@ def api_generate_scores():
 			folderid = item['id']
 
 	diversity_dictionary = get_diversity_dictionary(drive,folderid)
-	print(diversity_dictionary)
+	print(diversity_dictionary)     
 	document_collection = get_document_collection(drive,folderid)
 	print(document_collection)
-	scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	return render_template("results.html", resultsJSON=scores.to_json(), resultsLen=2)
+
+	diversity_scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+	diversity_scores_mean = diversity_scores.mean()
+	diversity_scores_std = diversity_scores.std()
+
+	return render_template("results.html", 
+						resultsJSON = diversity_scores.to_json(), 
+						resultsLen = 2, 
+						diversity_scores_mean = diversity_scores_mean, 
+						diversity_scores_std = diversity_scores_std)
 
 
 
