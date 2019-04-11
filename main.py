@@ -9,6 +9,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 from apiclient import errors
 from apiclient import http
+import time
 
 CLIENT_SECRETS_FILE = "client_secret.json"
 
@@ -50,7 +51,10 @@ def find_dict(service, folder_id):
         # Check if file is dictionary
         if file['fileExtension'] == "csv":
           print "DICTIONARY"
-          return service.files().get_media(fileId=child['id']).execute().split(',')
+          contents =  service.files().get_media(fileId=child['id']).execute()
+          print type(contents)
+          contents = contents.replace("\n",",")
+          return str(contents).split(',')
         else:
           print "SCOREFILE"
       page_token = children.get('nextPageToken')
@@ -77,13 +81,17 @@ def get_docs(service, folder_id):
           folderId=folder_id, **param).execute()
       for child in children.get('items', []):
         #print child
+        start_time = time.time()
         file = service.files().get(fileId=child['id']).execute()
+        print("Find file time is %s seconds ---" % (time.time() - start_time))
         # Check if file is dictionary
         if file['fileExtension'] == "txt":
           #print("FILEFOUND")
           comp_name = file['title'].split('_')[0]
           #print(comp_name)
+          start_time = time.time()
           content = service.files().get_media(fileId=child['id']).execute()
+          print("Content time is %s seconds ---" % (time.time() - start_time))
           #print(content)
           compdict[comp_name] = content
       page_token = children.get('nextPageToken')
@@ -185,9 +193,9 @@ def api_generate_scores():
 
   	folderid = ''
   	for item  in files['items']:
-		#print item['title']
+
 		if item['title'] == 'Diversity':
-			#print "success"
+
 			folderid = item['id']
 
 	diversity_dictionary = find_dict(drive,folderid)
@@ -201,7 +209,7 @@ def api_generate_scores():
 	print(document_collection)
 	
 	scores = model.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	return json.dumps(scores.to_json())
+	return scores.to_json()
 
 
 
