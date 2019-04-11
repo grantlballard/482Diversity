@@ -37,6 +37,7 @@ class Results extends React.Component {
     this.setState({ value });
   };
 
+  // function that converts a python string into JSON
   stringToJSON(results, resultsLength) {
     //original string has single quotes and double quotes are needed for correct JSON.parse format
     for (var i = 0; i < resultsLength; i++) {
@@ -47,28 +48,36 @@ class Results extends React.Component {
     return results;
   }
 
+  // converting the json to the approriate formate that is needed for React Table data
+  reformattingJSON(json) {
+    // get the name of the first column (comp_name in this case) so that we can
+    // get the length of how many keys it has
+    const firstColumn = Object.keys(json)[0];
+    const numDocuments = Object.keys(json[firstColumn]).length;
+    const numColumns = Object.keys(json).length;
+
+    var finalJSON = [];
+    var jsonData = {};
+    for (var i = 0; i < numDocuments; i++) {
+      jsonData = {
+        name: json[Object.keys(json)[0]][i],
+        score: json[Object.keys(json)[1]][i],
+        cuspi: json[Object.keys(json)[2]][i]
+      };
+      finalJSON.push(jsonData);
+    }
+    return finalJSON;
+  }
+
   render() {
-    // function that converts a python string into JSON
     var resultsJSON = this.stringToJSON(
       this.props.results,
       this.props.resultsLength
     );
     console.log(resultsJSON);
 
-    // converting the json to the approriate formate that is needed for React Table data
-    const numDocuments = Object.keys(resultsJSON["comp_name"]).length;
-    var finalJSON = [];
-    var jsonData = {};
-    for (var i = 0; i < numDocuments; i++) {
-      jsonData = {
-        name: resultsJSON["comp_name"][i],
-        cusip: resultsJSON["cusip"][i],
-        score: resultsJSON["score"][i]
-      };
-      finalJSON.push(jsonData);
-    }
-
-    console.log(finalJSON);
+    resultsJSON = this.reformattingJSON(resultsJSON);
+    console.log(resultsJSON);
 
     const { classes } = this.props;
     const { value } = this.state;
@@ -89,7 +98,7 @@ class Results extends React.Component {
           </AppBar>
 
           {// Tab 1 -> the table of results
-          value === 0 && <Table results={finalJSON} />}
+          value === 0 && <Table results={resultsJSON} />}
           {value === 1 && <TabContainer>Item Two</TabContainer>}
         </div>
       </div>

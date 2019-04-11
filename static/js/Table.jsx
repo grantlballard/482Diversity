@@ -30,19 +30,6 @@ const styles = theme => ({
 
 class Table extends React.Component {
   render() {
-    const data = [
-      {
-        name: "Tanner Linsley",
-        score: 34
-      },
-      {
-        name: "Jake Bell",
-        score: 25
-      }
-    ];
-
-    console.log(data);
-
     const columns = [
       {
         Header: "Company Name",
