@@ -2,7 +2,35 @@ import numpy as np
 import math
 import re
 import string
-import pandas
+import const
+import pandas as pd
+
+def validate_file_title(file_title):
+	"""
+	Params:
+		file_title: str. filename
+	Returns:
+		None
+	Raises:
+		ValueError if file does not have format name_cusip_description.txt
+	"""
+	if len(file_title.split("_")) != 3:
+		error_message = "Invalid file name: {}\nPlease rename file to have the format name_cusip_description.txt".format(file_title)
+		raise ValueError(error_message)
+
+def parse_file_title(file_title):
+	"""
+	Params:
+		file_title: str. filename
+	Returns:
+		(str, str). company name and company cusip parsed from 'file_title'
+	"""
+	validate_file_title(file_title)
+
+	comp_name = file_title.split('_')[0]
+	cusip = file_title.split('_')[1]
+
+	return (comp_name, cusip)
 
 def tokenize(d):
     """
@@ -119,15 +147,21 @@ def get_document_diversity_score(diversity_dictionary, document, document_collec
 def get_collection_diversity_scores(diversity_dictionary, document_collection):
     """
     Parameters:
-        diversity_dictionary -> [string]. List of strings representing the concept of diversity.
-        document_colleciton -> [[string]] list of all tokenized company documents.
+        diversity_dictionary -> [str]. List of strings representing the concept of diversity.
+        document_colleciton -> [(str, [str])] list of tuples with companyname_cusip_description a tokenized company document.
     Returns:
         pd.DataFrame with columns 'comp_name', 'score', 'cusip'
     """
     scores = []
-    doc_collect = [i[1] for i in document_collection]
-    for name, document in document_collection:
-        document_score = get_document_diversity_score(diversity_dictionary, document, doc_collect)
-        scores.append([name,document_score,"placeholercusip"])
-    scores = pandas.DataFrame(scores, columns = ['comp_name','score','cusip'])
+    doc_collect = [doc for file_title, doc in document_collection]
+    for file_title, document in document_collection:
+        # Get new row values
+        comp_name, comp_cusip = parse_file_title(file_title)
+        diversity_score = get_document_diversity_score(diversity_dictionary, document, doc_collect)
+
+        # Append new row
+        new_row = [comp_name, diversity_score, comp_cusip]
+        scores.append(new_row)
+    
+    scores = pd.DataFrame(scores, columns = ['comp_name','score','cusip'])
     return scores

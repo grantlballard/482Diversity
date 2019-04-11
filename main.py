@@ -7,6 +7,7 @@ import sys
 import os
 import flask
 import requests
+import const
 import diversity_score_model as dsm
 import finance_model as fm
 import pandas as pd
@@ -41,7 +42,6 @@ def get_diversity_dictionary(service, folder_id):
 	page_token = None
 	counter = 0
 	while True:
-		print("Counter: {}".format(counter))
 		counter += 1
 		try:
 			param = {}
@@ -87,14 +87,10 @@ def get_document_collection(service, folder_id):
 				file = service.files().get(fileId=child['id']).execute()
 				# Check if file is dictionary
 				if 'fileExtension' in file and file['fileExtension'] == "txt":
-					#print("FILEFOUND")
-					comp_name = file['title'].split('_')[0]
-
-					#print(comp_name)
+					comp_name = file['title']
 					content = get_file_wrapper(service, child["id"])
 					content = dsm.tokenize(content)
 					content = dsm.tokenized_to_ngram(content, 2)
-					print("Company Document: {}".format(content))
 					compdict[comp_name] = content
 			page_token = children.get('nextPageToken')
 			if not page_token:
@@ -203,25 +199,31 @@ def api_generate_scores():
 
 	folderid = ''
 	for item  in files['items']:
-		#print item['title']
 		if item['title'] == 'Diversity':
-			#print "success"
 			folderid = item['id']
 
 	diversity_dictionary = get_diversity_dictionary(drive,folderid)
-	print(diversity_dictionary)     
 	document_collection = get_document_collection(drive,folderid)
-	print(document_collection)
 
-	diversity_scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	diversity_scores_mean = diversity_scores.mean()
-	diversity_scores_std = diversity_scores.std()
+	diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+	diversity_scores_mean = diversity_scores_df.mean()
+	diversity_scores_std = diversity_scores_df.std()
+
+	financial_df = pd.DataFrame([["00846U101", "86", "10", "10"], 
+															 ["00724F101", "71", "50",	"100"]], 
+															 columns = [const.CUSIP_COL, const.HRC_COL,	"Current_Assets",	"Total_Assets"])
+	merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+	diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
+	financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
 
 	return render_template("results.html", 
-						resultsJSON = diversity_scores.to_json(), 
-						resultsLen = 2, 
+						resultsJSON = diversity_scores_df.to_json(), 
+						resultsLen = 2,
 						diversity_scores_mean = diversity_scores_mean, 
-						diversity_scores_std = diversity_scores_std)
+						diversity_scores_std = diversity_scores_std,
+						diversity_and_hrc_correlation = diversity_and_hrc_correlation,
+						finance_results_JSON = financial_scores_df.to_json() 
+						)
 
 
 
