@@ -211,7 +211,7 @@ def api_generate_scores():
 	document_collection = get_document_collection(drive,folderid)
 	print(document_collection)
 	scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	return render_template("results.html", resultsJSON=scores.to_json(), resultsLen=2)
+	return render_template("results.html", resultsJSON=scores.to_json())
 
 
 

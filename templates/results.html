@@ -5,34 +5,17 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="{{ url_for('static', filename="js/Table.jsx")}}" type="text/javascript"></script>
 
-  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-
-  <!-- Don't use this in production: -->
-  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename="css/results.css")}}">
 
   <meta charset="utf-8" />
   <title>Results</title>
 
-  <style>
-    .back-gray {
-      background-color: white;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      padding-top: 40px;
-    }
-
-    #table-content {
-      background-color: whitesmoke;
-    }
-  </style>
 </head>
 
 <body>
   <div class="back-gray">
     <div class="container">
-      <div id="table-content" results="{{ resultsJSON }}" resultsLength="{{ resultsLen }}" />
+      <div id="table-content" results="{{ resultsJSON }}" />
     </div>
     <script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
   </div>
