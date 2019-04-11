@@ -3,6 +3,7 @@ import math
 import re
 import string
 import pandas
+import unicodedata
 
 def tokenize(d):
     """
@@ -11,6 +12,10 @@ def tokenize(d):
     Returns:
         [string]. Tokenized version of 'd'
     """
+    print("CONTENTS OF FILE:")
+    if isinstance(d,unicode):
+        d=unicodedata.normalize('NFKD', d).encode('ascii','ignore')
+        d=str(d)
     if not isinstance(d, str):
         raise TypeError
 

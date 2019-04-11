@@ -41,81 +41,82 @@ document_collection = [dsm.tokenized_to_ngram(doc, 2) for doc in document_collec
 folderid = 'Diversity'
 
 def get_file_wrapper(service, file_id):
-	content = service.files().get_media(fileId=file_id).execute()
-	content = content.decode("utf-8") if type(content) == bytes else content
-	content = content.strip()
-	return content
+  content = service.files().get_media(fileId=file_id).execute()
+  content = content.decode("utf-8") if type(content) == bytes else content
+  content = content.strip()
+  return content
 
 '''
 This function finds the csv from the selected folder id. It returns the contents of that folder as a list
 '''
 def get_diversity_dictionary(service, folder_id):
-	page_token = None
-	counter = 0
-	while True:
-		print("Counter: {}".format(counter))
-		counter += 1
-		try:
-			param = {}
-			if page_token:
-				param['pageToken'] = page_token
-			children = service.children().list(folderId=folder_id, **param).execute()
+  page_token = None
+  counter = 0
+  while True:
+    print("Counter: {}".format(counter))
+    counter += 1
+    try:
+      param = {}
+      if page_token:
+        param['pageToken'] = page_token
+      children = service.children().list(folderId=folder_id, **param).execute()
 
-			for child in children.get('items', []):
-				#print child
-				file = service.files().get(fileId=child['id']).execute()
-				# Check if file is dictionary
-				if file['fileExtension'] == "csv":
-					print("DICTIONARY")
-					content = get_file_wrapper(service, child["id"])
-					content = content.replace("\r\n", ",").split(",")
-					return content
-				else:
-					print("SCOREFILE")
-			page_token = children.get('nextPageToken')
-			if not page_token:
-				break
-		except errors.HttpError as error:
-			print('An error occurred: %s' % error)
-			break
+      for child in children.get('items', []):
+        #print child
+        file = service.files().get(fileId=child['id']).execute()
+        # Check if file is dictionary
+        if file['fileExtension'] == "csv":
+          print("DICTIONARY")
+          content = get_file_wrapper(service, child["id"])
+          content = content.replace("\n", ",").split(",")
+          print(content)
+          return content
+        else:
+          print("SCOREFILE")
+      page_token = children.get('nextPageToken')
+      if not page_token:
+        break
+    except errors.HttpError as error:
+      print('An error occurred: %s' % error)
+      break
 
 '''
-	This function goes through the the files within the folder passed in
-	and it in turn pulls out all text documents from the folder and adds them
-	to a dictionary where the key is the company name and the value is the document's text content
+  This function goes through the the files within the folder passed in
+  and it in turn pulls out all text documents from the folder and adds them
+  to a dictionary where the key is the company name and the value is the document's text content
 '''
 
 def get_document_collection(service, folder_id):
-	compdict = {}
-	page_token = None
-	while True:
-		try:
-			param = {}
-			if page_token:
-				param['pageToken'] = page_token
-			children = service.children().list(
-				folderId=folder_id, **param).execute()
-			for child in children.get('items', []):
-				#print child
-				file = service.files().get(fileId=child['id']).execute()
-				# Check if file is dictionary
-				if 'fileExtension' in file and file['fileExtension'] == "txt":
-					#print("FILEFOUND")
-					comp_name = file['title'].split('_')[0]
+  compdict = {}
+  page_token = None
+  while True:
+    try:
+      param = {}
+      if page_token:
+        param['pageToken'] = page_token
+      children = service.children().list(
+        folderId=folder_id, **param).execute()
+      for child in children.get('items', []):
+        #print child
+        file = service.files().get(fileId=child['id']).execute()
+        # Check if file is dictionary
+        if 'fileExtension' in file and file['fileExtension'] == "txt":
+          #print("FILEFOUND")
+          comp_name = file['title'].split('_')[0]
 
-					#print(comp_name)
-					content = get_file_wrapper(service, child["id"])
-					content = dsm.tokenize(content)
-					content = dsm.tokenized_to_ngram(content, 2)
-					print("Company Document: {}".format(content))
-					compdict[comp_name] = content
-			page_token = children.get('nextPageToken')
-			if not page_token:
-				break
-		except errors.HttpError as error:
-			print('An error occurred: %s' % error)
-			break
-	return compdict
+          #print(comp_name)
+          content = get_file_wrapper(service, child["id"])
+          content = dsm.tokenize(content)
+          content = dsm.tokenized_to_ngram(content, 2)
+          print("Company Document: {}".format(content))
+          compdict[comp_name] = content
+      page_token = children.get('nextPageToken')
+      if not page_token:
+        break
+    except errors.HttpError as error:
+      print('An error occurred: %s' % error)
+      break
+  return compdict
 
 
 
@@ -130,21 +131,22 @@ def credentials_to_dict(credentials):
 
 @app.route("/")
 def api_home():
-	return render_template("home.html")
+  return render_template("home.html")
 
 # going to change this to a function to change the doc directory
-@app.route("/upload_dict", methods = ["POST","GET"])
-def upload_dictionary():
-	if request.method == 'POST':
-		d_content  = request.form
-		d_content = d_content.to_dict()
-		initdict = ''.join(d_content['test'])
-		convdict = initdict.replace('\n',',')
-		outfile = open('divdict.csv','w')
-		outfile.write(convdict)
-		outfile.close()
-		return 'success'
-	return " fail"
+@app.route("/upload_folder", methods = ["POST","GET"])
+def upload_folder():
+    print("I am here my brother")
+    d_content  = request.form
+    print(d_content)
+    d_content = d_content.to_dict()
+    print(d_content)
+    fid = d_content['folder']
+    print(fid)
+    flask.session['fid'] = fid
+    #folderid = ''.join(d_content['folder'])
+    #print(folderid)
+    return 'response'
 
 #authorize route, copied from google's flask tutorial
 @app.route('/authorize')
@@ -200,28 +202,31 @@ def oauth2callback():
 # this route pulls files from the drive and generates the scores
 @app.route("/get_scores", methods=['GET', 'POST'])
 def api_generate_scores():
-	if 'credentials' not in flask.session:
-		return flask.redirect('authorize')
+  if 'credentials' not in flask.session:
+    return flask.redirect('authorize')
+  credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
-	credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
+  drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-	drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+  folderid = flask.session['fid']
+  print('FID: ',folderid)
+  
+  '''
+  files = drive.files().list().execute()
+    folderid = ''
+    for item  in files['items']:
+      if item['title'] == 'Diversity':
+         folderid = item['id']'''
 
-	files = drive.files().list().execute()
-  	folderid = ''
-  	for item  in files['items']:
-		  if item['title'] == 'Diversity':
-			   folderid = item['id']
-
-	diversity_dictionary = get_diversity_dictionary(drive,folderid)
-	print(diversity_dictionary)
-	document_collection = get_document_collection(drive,folderid)
-	print(document_collection)
-	scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	return scores.to_json()
+  diversity_dictionary = get_diversity_dictionary(drive,folderid)
+  print(diversity_dictionary)
+  document_collection = get_document_collection(drive,folderid)
+  print(document_collection)
+  scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+  return scores.to_json()
 
 
 
 if __name__ == "__main__":
-	os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-	app.run(debug=True)
+  os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+  app.run('localhost',8080,debug=True)
