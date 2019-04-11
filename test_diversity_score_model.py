@@ -32,9 +32,9 @@ def doc_collection(doc):
     """
     doc_2 = "This is an example document uniqueword1"
     doc_3 = "This is an example document uniqueword2"
-    return [("comp_1", doc), 
-            ("comp_2", doc_2), 
-            ("comp_3", doc_3)]    
+    return [("comp1_1_ceoletter", doc), 
+            ("comp2_2_ceoletter", doc_2), 
+            ("comp3_3_ceoletter", doc_3)]    
 
 
 @pytest.fixture
@@ -130,9 +130,9 @@ def test_get_document_diversity_score(diversity_dictionary, tokenized_doc_collec
 
 
 def test_get_collection_diversity_scores(diversity_dictionary, tokenized_doc_collection):
-    expected_scores = [ ["comp_1", 1, "placeholercusip"],
-                        ["comp_2", 4, "placeholercusip"], 
-                        ["comp_3", 4, "placeholercusip"]
+    expected_scores = [ ["comp1", 1, "1"],
+                        ["comp2", 4, "2"], 
+                        ["comp3", 4, "3"]
                       ]
     expected_df = pd.DataFrame(expected_scores, columns = ["comp_name", "score", "cusip"])
     df = dsm.get_collection_diversity_scores(diversity_dictionary, tokenized_doc_collection) == expected_df
