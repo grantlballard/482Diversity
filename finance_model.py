@@ -1,11 +1,9 @@
 from scipy.stats import pearsonr
 import pandas as pd
 import math
+import const
 
-COMP_NAME_COL = 'comp_name'
-HRC_COL = 'hrc'
-SCORE_COL = 'score'
-CUSIP_COL = 'cusip'
+
 
 def get_pearson_correlation(list_1, list_2):
     """
@@ -15,6 +13,12 @@ def get_pearson_correlation(list_1, list_2):
     Returns:
         (double, double). Pearson correlation coefficient and p-value of both datasets
     """
+    # Clean lists
+    list_1 = list_1.astype(float)
+    list_1 = list_1.dropna()
+    list_2 = list_2.astype(float)
+    list_2 = list_2.dropna() 
+
     if len(list_1) != len(list_2):
         raise ValueError("Cannot perform pearson correlation on lists of different length.\nList 1{}\n\nList2{}".format(list_1, list_2))
     pearson, p_val = pearsonr(list_1, list_2)
@@ -54,32 +58,33 @@ def get_dataframe_pearson_correlations(financial_df, diversity_scores_df):
     diversity_scores_df.columns = map(str.lower, diversity_scores_df.columns)
 
     # Validate dataframes
-    required_columns = [CUSIP_COL]
+    required_columns = [const.CUSIP_COL]
     check_required_columns_exist(financial_df, required_columns)
     check_required_columns_exist(diversity_scores_df, required_columns)
 
     # Generate correlations
     results = []
-    merged = pd.merge(diversity_scores_df, financial_df, on=CUSIP_COL)
-    merged = merged.drop(columns = [CUSIP_COL])
-    non_stat_columns = [COMP_NAME_COL, SCORE_COL, HRC_COL]
+    merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+    merged = merged.drop(columns = [const.CUSIP_COL])
+    non_stat_columns = [const.COMP_NAME_COL, const.SCORE_COL, const.HRC_COL]
     for stat in merged:
         if stat not in non_stat_columns:
             # Prepare dataframe for scoring
-            subset = merged[[SCORE_COL, HRC_COL, stat]].copy()
+            subset = merged[[const.SCORE_COL, const.HRC_COL, stat]].copy()
             subset[stat] = subset[stat].astype(float)
-            subset[HRC_COL] = subset[HRC_COL].astype(float)
-            subset[SCORE_COL] = subset[SCORE_COL].astype(float)
+            subset[const.HRC_COL] = subset[const.HRC_COL].astype(float)
+            subset[const.SCORE_COL] = subset[const.SCORE_COL].astype(float)
             subset = subset.dropna()
 
             # Get row values
             stat_mean = subset[stat].mean()
             stat_std = subset[stat].std()
-            diversity_correlation, diversity_p_val = get_pearson_correlation(subset[SCORE_COL], subset[stat])
-            hrc_correlation, hrc_p_val = get_pearson_correlation(subset[HRC_COL], subset[stat])
+            diversity_correlation, diversity_p_val = get_pearson_correlation(subset[const.SCORE_COL], subset[stat])
+            hrc_correlation, hrc_p_val = get_pearson_correlation(subset[const.HRC_COL], subset[stat])
             
             # Append new row
             new_row = [stat, stat_mean, stat_std, diversity_correlation, diversity_p_val, hrc_correlation, hrc_p_val]
             results.append(new_row)
     results = pd.DataFrame(results, columns=['Financial_Statistic', 'Mean', 'Std', 'Diversity_Correlation', 'Diversity_P_Value', 'HRC_Correlation', 'HRC_P_Value'])
     return results
+

@@ -7,6 +7,7 @@ import sys
 import os
 import flask
 import requests
+import const
 import diversity_score_model as dsm
 import finance_model as fm
 import pandas as pd
@@ -210,14 +211,19 @@ def api_generate_scores():
 
 	financial_df = pd.DataFrame([["00846U101", "86", "10", "10"], 
 															 ["00724F101", "71", "50",	"100"]], 
-															 columns = ["CUSIP", "HRC",	"Current_Assets",	"Total_Assets"])
+															 columns = [const.CUSIP_COL, const.HRC_COL,	"Current_Assets",	"Total_Assets"])
+	merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+	diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
 	financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+
 	return render_template("results.html", 
-						resultsJSON = diversity_scores.to_json(), 
+						resultsJSON = diversity_scores_df.to_json(), 
 						resultsLen = 2,
-						finance_results_JSON = financial_df.to_json(), 
 						diversity_scores_mean = diversity_scores_mean, 
-						diversity_scores_std = diversity_scores_std)
+						diversity_scores_std = diversity_scores_std,
+						diversity_and_hrc_correlation = diversity_and_hrc_correlation,
+						finance_results_JSON = financial_scores_df.to_json() 
+						)
 
 
 
