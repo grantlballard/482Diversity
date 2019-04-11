@@ -122,7 +122,7 @@ def get_collection_diversity_scores(diversity_dictionary, document_collection):
         diversity_dictionary -> [string]. List of strings representing the concept of diversity.
         document_colleciton -> [[string]] list of all tokenized company documents.
     Returns:
-        tuple(string,double). List of tuples, first element in the tuple is the company name, second is the generated score
+        pd.DataFrame with columns 'comp_name', 'score', 'cusip'
     """
     scores = []
     doc_collect = [i[1] for i in document_collection]

@@ -41,15 +41,64 @@ class Table extends React.Component {
       }
     ];
 
+    console.log(data);
+
     const columns = [
       {
         Header: "Company Name",
-        accessor: "name" // String-based value accessors!
+        accessor: "name",
+        Cell: props => (
+          <div
+            className="number"
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
+      },
+      {
+        Header: "Cusip",
+        accessor: "cusip",
+        Cell: props => (
+          <div
+            className="number"
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
       },
       {
         Header: "Score",
         accessor: "score",
-        Cell: props => <span className="number">{props.value}</span> // Custom cell components!
+        Cell: props => (
+          <div
+            className="number"
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
+      },
+      {
+        Header: "HRC",
+        accessor: "hrc",
+        Cell: props => (
+          <div
+            className="number"
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
       }
     ];
 

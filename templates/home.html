@@ -1,27 +1,21 @@
-<!-- background-image: linear-gradient(to bottom right, LightCoral, white);
+{% extends 'base.html' %}
 
--->
+{% block title %}
+  <title>Diversity Mining</title>
+{% endblock %}
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-
-    <!-- JavaScript -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="{{ url_for('static', filename="js/loadfn.js")}}"></script>
-    <script type="text/babel" src="{{ url_for('static', filename="js/reactComponent.js")}}"></script>
-
-    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename="css/home.css")}}"></link>
-
-    <meta charset="utf-8" />
-    <title>Diversity Mining</title>
-  </head>
-  <body>
-    <div id="home-div">
+{% block custom_javascript %}
+  <script src="{{ url_for('static', filename="js/loadfn.js")}}"></script>
+  <script type="text/babel" src="{{ url_for('static', filename="js/reactComponent.js")}}"></script>
+{% endblock %} 
+    
+{% block custom_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename="css/home.css")}}"></link>
+{% endblock %}    
+  
+{% block content %}
+  <script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
+  <div id="home-div">
       <div class="container">
         <div class="row justify-content-md-center">
           <div class="col col-md-auto">
@@ -67,10 +61,6 @@
       </div>
     </div>
   </div>
+{% endblock %}
 
-</body>
-
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous" />
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-
-</html>
+  
