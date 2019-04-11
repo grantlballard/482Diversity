@@ -14,6 +14,21 @@ def get_pearson_correlation(list_1, list_2):
     return pearsonr(list_1, list_2)
 
 
+def check_required_columns_exist(data_frame, required_columns):
+    """
+    Parameters:
+        data_frame: pd.DataFrame
+        required_columns: [string]. List of required columns in data_frame
+    Returns:
+        None
+    Raises: 
+        ValueError if one of the required columns is not found
+    """
+    for col in required_columns:
+        if col not in data_frame:
+            raise ValueError("Required column {} not found in data frame with columns {}".format(col, list(data_frame.columns)))
+
+
 def get_dataframe_pearson_correlations(financial_df, diversity_scores_df):
     """
     Parameters:
@@ -21,14 +36,13 @@ def get_dataframe_pearson_correlations(financial_df, diversity_scores_df):
         diversity_scores -> pandas.DataFrame. Diversity scores for each company 
     Returns:
         pd.DataFrame. DataFrame with columns 'Financial_Statistic', 'Correlation', 'P_Value'
+        Each row will have a financial statistic from the 'financial_df' DataFrame
+        and its correlation with diversity scores.
     """
     # Validate dataframes
     required_columns = ["CUSIP"]
-    for col in required_columns:
-        if col not in financial_df:
-            raise ValueError("financial_df must have column {}".format(col))
-        if col not in diversity_scores_df:
-            raise ValueError("diversity_scores must have column {}".format(col))
+    check_required_columns_exist(financial_df, required_columns)
+    check_required_columns_exist(diversity_scores_df, required_columns)
 
     # Generate correlations
     results = []
