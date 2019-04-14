@@ -42,7 +42,7 @@ def tokenize(d):
         [string]. Tokenized version of 'd'
     """
     print("CONTENTS OF FILE:")
-    if isinstance(d,unicode):
+    if isinstance(d,str):
         d=unicodedata.normalize('NFKD', d).encode('ascii','ignore')
         d=str(d)
     if not isinstance(d, str):
