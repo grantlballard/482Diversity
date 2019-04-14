@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Research Methods</title>
+{% endblock %}
+
+{% block custom_css %}
+    <style>
+        .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
+        .w3-half img:hover{opacity:1}
+    </style>
+{% endblock %}
+
+{% block in_page_nav_links %}
+    <a href="#dictionary" class="w3-bar-item w3-button w3-hover-white">Dictionary</a> 
+    <a href="#scoring" class="w3-bar-item w3-button w3-hover-white">Scoring</a> 
+    <a href="#correlations" class="w3-bar-item w3-button w3-hover-white">Correlations</a> 
+{% endblock %}
+
+{% block content %}
+    <!-- !PAGE CONTENT! -->
+    <div class="w3-main" style="margin-left:340px;margin-right:40px">
+
+        <!-- Header -->
+        <div class="w3-container" style="margin-top:80px" id="showcase">
+            <h1 class="w3-jumbo"><b>Research Methods</b></h1>
+        </div>
+        
+        <!-- Dictionary -->
+        <div class="w3-container" id="dictionary" style="margin-top:75px">
+            <h1 class="w3-xxxlarge w3-text-red"><b>Dictionary.</b></h1>
+            <hr style="width:50px;border:5px solid red" class="w3-round">
+            <p>We built a dictionary using NLP.</p>
+            <p>lorem ipsum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
+            dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
+        </div>
+        
+        <!-- Scoring -->
+        <div class="w3-container" id="scoring" style="margin-top:75px">
+            <h1 class="w3-xxxlarge w3-text-red"><b>Scoring.</b></h1>
+            <hr style="width:50px;border:5px solid red" class="w3-round">
+            <p>We scored companies using our dictionary and tf-idf.</p>
+            <p>We are lorem ipsum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
+            dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
+        </div>
+
+        <!-- Correlations -->
+        <div class="w3-container" id="correlations" style="margin-top:75px">
+            <h1 class="w3-xxxlarge w3-text-red"><b>Correlations</b></h1>
+            <hr style="width:50px;border:5px solid red" class="w3-round">
+            <p>We generated correlations between different statistics using the Pearson correlation metric.</p>
+            <p>We are lorem ipsum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
+            dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
+        </div>
+    <!-- End page content -->
+    </div>      
+{% endblock %}

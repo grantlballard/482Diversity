@@ -7,6 +7,7 @@ import sys
 import os
 import flask
 import requests
+import const
 import diversity_score_model as dsm
 import finance_model as fm
 import pandas as pd
@@ -24,19 +25,8 @@ SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 API_SERVICE_NAME = 'drive'
 API_VERSION = 'v2'
 
-# Toy diversity dictionary
-diversity_dictionary = ["diverse teams", "diverse people", "love teamwork"]
 app = Flask(__name__)
 app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
-#app.secret_key = 'A0Zr98j23yX R~Xav!jmN]LWX@,?RT'
-
-# Toy document collection
-company_1_document = "We believe in building diverse teams that are great at communication and love teamwork."
-company_2_document = "We love teamwork. We believe teamwork is the best way to succeed."
-company_3_document = "Diverse people make our company succeed. It's all about teamwork."
-document_collection = [company_1_document, company_2_document, company_3_document]
-document_collection = [dsm.tokenize(doc) for doc in document_collection]
-document_collection = [dsm.tokenized_to_ngram(doc, 2) for doc in document_collection]
 
 folderid = 'Diversity'
 
@@ -100,36 +90,33 @@ def get_diversity_dictionary(service, folder_id):
 '''
 
 def get_document_collection(service, folder_id):
-  compdict = {}
-  page_token = None
-  while True:
-    try:
-      param = {}
-      if page_token:
-        param['pageToken'] = page_token
-      children = service.children().list(
-        folderId=folder_id, **param).execute()
-      for child in children.get('items', []):
-        #print child
-        file = service.files().get(fileId=child['id']).execute()
-        # Check if file is dictionary
-        if 'fileExtension' in file and file['fileExtension'] == "txt":
-          #print("FILEFOUND")
-          comp_name = file['title'].split('_')[0]
+	compdict = {}
+	page_token = None
+	while True:
+		try:
+			param = {}
+			if page_token:
+				param['pageToken'] = page_token
+			children = service.children().list(
+				folderId=folder_id, **param).execute()
+			for child in children.get('items', []):
+				#print child
+				file = service.files().get(fileId=child['id']).execute()
+				# Check if file is dictionary
+				if 'fileExtension' in file and file['fileExtension'] == "txt":
+					comp_name = file['title']
+					content = get_file_wrapper(service, child["id"])
+					content = dsm.tokenize(content)
+					content = dsm.tokenized_to_ngram(content, 2)
+					compdict[comp_name] = content
+			page_token = children.get('nextPageToken')
+			if not page_token:
+				break
+		except errors.HttpError as error:
+			print('An error occurred: %s' % error)
+			break
+	return compdict
 
-          #print(comp_name)
-          content = get_file_wrapper(service, child["id"])
-          content = dsm.tokenize(content)
-          content = dsm.tokenized_to_ngram(content, 2)
-          print("Company Document: {}".format(content))
-          compdict[comp_name] = content
-      page_token = children.get('nextPageToken')
-      if not page_token:
-        break
-    except errors.HttpError as error:
-      print('An error occurred: %s' % error)
-      break
-  return compdict
 
 
 
@@ -180,8 +167,13 @@ def authorize():
 
 
 @app.route("/results")
-def results():
+def api_results():
     return render_template("results.html")
+
+
+@app.route("/methods")
+def api_methods():
+	return render_template("methods.html")
 
 
 #oath route, called when the user isn't currently logged into a drive account
@@ -230,10 +222,25 @@ def api_generate_scores():
 
   document_collection = get_document_collection(drive,folderid)
 
-  scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-  return scores.to_json()
+  diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+  diversity_scores_mean = diversity_scores_df.mean()
+  diversity_scores_std = diversity_scores_df.std()
 
+  financial_df = pd.DataFrame([["00846U101", "86", "10", "10"], 
+  														 ["00724F101", "71", "50",	"100"]], 
+  														 columns = [const.CUSIP_COL, const.HRC_COL,	"Current_Assets",	"Total_Assets"])
+  merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+  diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
+  financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
 
+  return render_template("results.html", 
+  					resultsJSON = diversity_scores_df.to_json(), 
+  					resultsLen = 2,
+  					diversity_scores_mean = diversity_scores_mean, 
+  					diversity_scores_std = diversity_scores_std,
+  					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
+  					finance_results_JSON = financial_scores_df.to_json() 
+  					)
 
 if __name__ == "__main__":
   os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
