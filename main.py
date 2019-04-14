@@ -131,7 +131,7 @@ def credentials_to_dict(credentials):
 
 @app.route("/")
 def api_home():
-  return render_template("home.html")
+  return render_template("home.html", DEVELOPER_KEY = app.secret_key)
 
 # going to change this to a function to change the doc directory
 @app.route("/upload_folder", methods = ["POST","GET"])
