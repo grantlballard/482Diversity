@@ -67,7 +67,7 @@ def get_diversity_dictionary(service, folder_id):
             count += 1
           if file['title'] == 'finance' or file['title'] == 'finance.csv':
             content = get_file_wrapper(service, child["id"])
-            content = content.split("\n")
+            content = pd.read_csv(pd.compat.StringIO(content))
             fincont = content
             count += 1
           if count == 2:
@@ -88,7 +88,6 @@ def get_diversity_dictionary(service, folder_id):
   and it in turn pulls out all text documents from the folder and adds them
   to a dictionary where the key is the company name and the value is the document's text content
 '''
-
 def get_document_collection(service, folder_id):
 	compdict = {}
 	page_token = None
@@ -203,44 +202,45 @@ def oauth2callback():
 # this route pulls files from the drive and generates the scores
 @app.route("/get_scores", methods=['GET', 'POST'])
 def api_generate_scores():
-  if 'credentials' not in flask.session:
-    return flask.redirect('authorize')
-  credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
+	if 'credentials' not in flask.session:
+		return flask.redirect('authorize')
+	credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
-  drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+	drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-  folderid = flask.session['fid']
-  
-  '''
-  files = drive.files().list().execute()
-    folderid = ''
-    for item  in files['items']:
-      if item['title'] == 'Diversity':
-         folderid = item['id']'''
+	folderid = flask.session['fid']
 
-  diversity_dictionary,financial = get_diversity_dictionary(drive,folderid)
+	'''
+	files = drive.files().list().execute()
+		folderid = ''
+		for item  in files['items']:
+			if item['title'] == 'Diversity':
+					folderid = item['id']'''
 
-  document_collection = get_document_collection(drive,folderid)
+	diversity_dictionary, financial_df = get_diversity_dictionary(drive,folderid)
+	document_collection = get_document_collection(drive,folderid)
 
-  diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-  diversity_scores_mean = diversity_scores_df.mean()
-  diversity_scores_std = diversity_scores_df.std()
+	diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+	diversity_scores_mean = diversity_scores_df.mean()
+	diversity_scores_std = diversity_scores_df.std()
 
-  financial_df = pd.DataFrame([["00846U101", "86", "10", "10"], 
-  														 ["00724F101", "71", "50",	"100"]], 
-  														 columns = [const.CUSIP_COL, const.HRC_COL,	"Current_Assets",	"Total_Assets"])
-  merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
-  diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
-  financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+	# Clean dataframes
+	financial_df.columns = map(str.lower, financial_df.columns)
+	diversity_scores_df.columns = map(str.lower, diversity_scores_df.columns)
+	
 
-  return render_template("results.html", 
-  					resultsJSON = diversity_scores_df.to_json(), 
-  					resultsLen = 2,
-  					diversity_scores_mean = diversity_scores_mean, 
-  					diversity_scores_std = diversity_scores_std,
-  					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
-  					finance_results_JSON = financial_scores_df.to_json() 
-  					)
+	merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+	diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
+	financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+
+	return render_template("results.html", 
+						resultsJSON = diversity_scores_df.to_json(), 
+						resultsLen = 2,
+						diversity_scores_mean = diversity_scores_mean, 
+						diversity_scores_std = diversity_scores_std,
+						diversity_and_hrc_correlation = diversity_and_hrc_correlation,
+						finance_results_JSON = financial_scores_df.to_json() 
+						)
 
 if __name__ == "__main__":
   os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'

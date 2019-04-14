@@ -77,6 +77,7 @@ def get_dataframe_pearson_correlations(financial_df, diversity_scores_df):
             subset = subset.dropna()
 
             # Get row values
+            print(len(subset))
             stat_mean = subset[stat].mean()
             stat_std = subset[stat].std()
             diversity_correlation, diversity_p_val = get_pearson_correlation(subset[const.SCORE_COL], subset[stat])
