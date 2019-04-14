@@ -60,17 +60,29 @@ def get_diversity_dictionary(service, folder_id):
       if page_token:
         param['pageToken'] = page_token
       children = service.children().list(folderId=folder_id, **param).execute()
-
+      count = 0
+      dictcont = []
+      fincont = []
       for child in children.get('items', []):
         #print child
         file = service.files().get(fileId=child['id']).execute()
         # Check if file is dictionary
         if file['fileExtension'] == "csv":
-          print("DICTIONARY")
-          content = get_file_wrapper(service, child["id"])
-          content = content.replace("\n", ",").split(",")
-          print(content)
-          return content
+          print(file['title'])
+          if file['title'] == 'dictionary.csv' or file['title'] == 'dictionary':
+            print("here")
+            content = get_file_wrapper(service, child["id"])
+            content = content.replace("\n", ",").split(",")
+            dictcont = content
+            count += 1
+          if file['title'] == 'finance' or file['title'] == 'finance.csv':
+            content = get_file_wrapper(service, child["id"])
+            content = content.split("\n")
+            fincont = content
+            count += 1
+          if count == 2:
+            return dictcont,fincont
+          #return content
         else:
           print("SCOREFILE")
       page_token = children.get('nextPageToken')
@@ -79,6 +91,7 @@ def get_diversity_dictionary(service, folder_id):
     except errors.HttpError as error:
       print('An error occurred: %s' % error)
       break
+
 
 '''
   This function goes through the the files within the folder passed in
@@ -213,7 +226,7 @@ def api_generate_scores():
       if item['title'] == 'Diversity':
          folderid = item['id']'''
 
-  diversity_dictionary = get_diversity_dictionary(drive,folderid)
+  diversity_dictionary,financial = get_diversity_dictionary(drive,folderid)
 
   document_collection = get_document_collection(drive,folderid)
 
