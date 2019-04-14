@@ -2,6 +2,7 @@ import numpy as np
 import math
 import re
 import string
+import unicodedata
 import const
 import pandas as pd
 
@@ -32,6 +33,7 @@ def parse_file_title(file_title):
 
 	return (comp_name, cusip)
 
+
 def tokenize(d):
     """
     Parameters:
@@ -39,6 +41,10 @@ def tokenize(d):
     Returns:
         [string]. Tokenized version of 'd'
     """
+    print("CONTENTS OF FILE:")
+    if isinstance(d,str):
+        d=unicodedata.normalize('NFKD', d).encode('ascii','ignore')
+        d=str(d)
     if not isinstance(d, str):
         raise TypeError
 

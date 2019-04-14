@@ -14,8 +14,9 @@ import pandas as pd
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
-
-
+from apiclient import errors
+from apiclient import http
+import time
 
 CLIENT_SECRETS_FILE = "client_secret.json"
 
@@ -30,48 +31,64 @@ app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
 folderid = 'Diversity'
 
 def get_file_wrapper(service, file_id):
-	content = service.files().get_media(fileId=file_id).execute()
-	content = content.decode("utf-8") if type(content) == bytes else content
-	content = content.strip()
-	return content
+  content = service.files().get_media(fileId=file_id).execute()
+  content = content.decode("utf-8") if type(content) == bytes else content
+  content = content.strip()
+  return content
 
 '''
 This function finds the csv from the selected folder id. It returns the contents of that folder as a list
 '''
 def get_diversity_dictionary(service, folder_id):
-	page_token = None
-	counter = 0
-	while True:
-		counter += 1
-		try:
-			param = {}
-			if page_token:
-				param['pageToken'] = page_token
-			children = service.children().list(folderId=folder_id, **param).execute()
+  page_token = None
+  counter = 0
+  while True:
+    print("Counter: {}".format(counter))
+    counter += 1
+    try:
+      param = {}
+      if page_token:
+        param['pageToken'] = page_token
+      children = service.children().list(folderId=folder_id, **param).execute()
+      count = 0
+      dictcont = []
+      fincont = []
+      for child in children.get('items', []):
+        #print child
+        file = service.files().get(fileId=child['id']).execute()
+        # Check if file is dictionary
+        if file['fileExtension'] == "csv":
+          print(file['title'])
+          if file['title'] == 'dictionary.csv' or file['title'] == 'dictionary':
+            print("here")
+            content = get_file_wrapper(service, child["id"])
+            content = content.replace("\n", ",").split(",")
+            dictcont = content
+            count += 1
+          if file['title'] == 'finance' or file['title'] == 'finance.csv':
+            content = get_file_wrapper(service, child["id"])
+            content = content.split("\n")
+            fincont = content
+            count += 1
+          if count == 2:
+            return dictcont,fincont
+          #return content
+        else:
+          print("SCOREFILE")
+      page_token = children.get('nextPageToken')
+      if not page_token:
+        break
+    except errors.HttpError as error:
+      print('An error occurred: %s' % error)
+      break
 
-			for child in children.get('items', []):
-				#print child
-				file = service.files().get(fileId=child['id']).execute()
-				# Check if file is dictionary
-				if file['fileExtension'] == "csv":
-					print("DICTIONARY")
-					content = get_file_wrapper(service, child["id"])
-					content = content.replace("\r\n", ",").split(",")
-					return content
-				else:
-					print("SCOREFILE")
-			page_token = children.get('nextPageToken')
-			if not page_token:
-				break
-		except errors.HttpError as error:
-			print('An error occurred: %s' % error)
-			break
 
 '''
-	This function goes through the the files within the folder passed in
-	and it in turn pulls out all text documents from the folder and adds them
-	to a dictionary where the key is the company name and the value is the document's text content
+  This function goes through the the files within the folder passed in
+  and it in turn pulls out all text documents from the folder and adds them
+  to a dictionary where the key is the company name and the value is the document's text content
 '''
+
 def get_document_collection(service, folder_id):
 	compdict = {}
 	page_token = None
@@ -102,6 +119,7 @@ def get_document_collection(service, folder_id):
 
 
 
+
 def credentials_to_dict(credentials):
   return {'token': credentials.token,
           'refresh_token': credentials.refresh_token,
@@ -113,21 +131,18 @@ def credentials_to_dict(credentials):
 
 @app.route("/")
 def api_home():
-	return render_template("home.html")
+  return render_template("home.html", DEVELOPER_KEY = app.secret_key)
 
 # going to change this to a function to change the doc directory
-@app.route("/upload_dict", methods = ["POST","GET"])
-def upload_dictionary():
-	if request.method == 'POST':
-		d_content  = request.form
-		d_content = d_content.to_dict()
-		initdict = ''.join(d_content['test'])
-		convdict = initdict.replace('\n',',')
-		outfile = open('divdict.csv','w')
-		outfile.write(convdict)
-		outfile.close()
-		return 'success'
-	return " fail"
+@app.route("/upload_folder", methods = ["POST","GET"])
+def upload_folder():
+    d_content  = request.form
+    d_content = d_content.to_dict()
+    fid = d_content['folder']
+    flask.session['fid'] = fid
+    #folderid = ''.join(d_content['folder'])
+    #print(folderid)
+    return 'response'
 
 #authorize route, copied from google's flask tutorial
 @app.route('/authorize')
@@ -188,46 +203,45 @@ def oauth2callback():
 # this route pulls files from the drive and generates the scores
 @app.route("/get_scores", methods=['GET', 'POST'])
 def api_generate_scores():
-	if 'credentials' not in flask.session:
-		return flask.redirect('authorize')
+  if 'credentials' not in flask.session:
+    return flask.redirect('authorize')
+  credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
-	credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
+  drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-	drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+  folderid = flask.session['fid']
+  
+  '''
+  files = drive.files().list().execute()
+    folderid = ''
+    for item  in files['items']:
+      if item['title'] == 'Diversity':
+         folderid = item['id']'''
 
-	files = drive.files().list().execute()
+  diversity_dictionary,financial = get_diversity_dictionary(drive,folderid)
 
-	folderid = ''
-	for item  in files['items']:
-		if item['title'] == 'Diversity':
-			folderid = item['id']
+  document_collection = get_document_collection(drive,folderid)
 
-	diversity_dictionary = get_diversity_dictionary(drive,folderid)
-	document_collection = get_document_collection(drive,folderid)
+  diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+  diversity_scores_mean = diversity_scores_df.mean()
+  diversity_scores_std = diversity_scores_df.std()
 
-	diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	diversity_scores_mean = diversity_scores_df.mean()
-	diversity_scores_std = diversity_scores_df.std()
+  financial_df = pd.DataFrame([["00846U101", "86", "10", "10"], 
+  														 ["00724F101", "71", "50",	"100"]], 
+  														 columns = [const.CUSIP_COL, const.HRC_COL,	"Current_Assets",	"Total_Assets"])
+  merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+  diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
+  financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
 
-	financial_df = pd.DataFrame([["00846U101", "86", "10", "10"], 
-															 ["00724F101", "71", "50",	"100"]], 
-															 columns = [const.CUSIP_COL, const.HRC_COL,	"Current_Assets",	"Total_Assets"])
-	merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
-	diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
-	financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
-
-	return render_template("results.html", 
-						resultsJSON = diversity_scores_df.to_json(), 
-						resultsLen = 2,
-						diversity_scores_mean = diversity_scores_mean, 
-						diversity_scores_std = diversity_scores_std,
-						diversity_and_hrc_correlation = diversity_and_hrc_correlation,
-						finance_results_JSON = financial_scores_df.to_json() 
-						)
-
-
-
+  return render_template("results.html", 
+  					resultsJSON = diversity_scores_df.to_json(), 
+  					resultsLen = 2,
+  					diversity_scores_mean = diversity_scores_mean, 
+  					diversity_scores_std = diversity_scores_std,
+  					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
+  					finance_results_JSON = financial_scores_df.to_json() 
+  					)
 
 if __name__ == "__main__":
-	os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-	app.run(debug=True)
+  os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+  app.run('localhost',8080,debug=True)
