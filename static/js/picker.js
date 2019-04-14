@@ -41,7 +41,6 @@
 
       // Create and render a Picker object for picking user Photos.
       function createPicker() {
-        console.log();
         if (pickerApiLoaded && oauthToken) {
            var docsView = new google.picker.DocsView().
                                  setIncludeFolders(true).
@@ -62,7 +61,6 @@
 
       // A simple callback implementation.
       function pickerCallback(data) {
-        console.log("here");
         var folderid = 'nothing';
         if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
           var doc = data[google.picker.Response.DOCUMENTS][0];
@@ -80,10 +78,8 @@
             http.onreadystatechange = function() {
                 if(http.readyState == 4 && http.status == 200) {
                     document.getElementById('getscores').submit()
-                    alert("success");
                 }
             }
-        console.log("here")
         http.send("folder="+folderid);
 
         

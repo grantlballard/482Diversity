@@ -136,13 +136,9 @@ def api_home():
 # going to change this to a function to change the doc directory
 @app.route("/upload_folder", methods = ["POST","GET"])
 def upload_folder():
-    print("I am here my brother")
     d_content  = request.form
-    print(d_content)
     d_content = d_content.to_dict()
-    print(d_content)
     fid = d_content['folder']
-    print(fid)
     flask.session['fid'] = fid
     #folderid = ''.join(d_content['folder'])
     #print(folderid)
@@ -209,7 +205,6 @@ def api_generate_scores():
   drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
   folderid = flask.session['fid']
-  print('FID: ',folderid)
   
   '''
   files = drive.files().list().execute()
@@ -219,9 +214,9 @@ def api_generate_scores():
          folderid = item['id']'''
 
   diversity_dictionary = get_diversity_dictionary(drive,folderid)
-  print(diversity_dictionary)
+
   document_collection = get_document_collection(drive,folderid)
-  print(document_collection)
+
   scores = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
   return scores.to_json()
 
