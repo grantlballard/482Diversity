@@ -9,3 +9,9 @@
 #table-content {
   background-color: whitesmoke;
 }
+
+.horizontal-centered {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}

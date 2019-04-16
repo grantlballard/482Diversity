@@ -7,7 +7,7 @@ import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
-import Table from "./Table.jsx";
+import DiversityScores from "./DiversityScores.jsx";
 
 function TabContainer(props) {
   return (
@@ -20,6 +20,8 @@ function TabContainer(props) {
 TabContainer.propTypes = {
   children: PropTypes.node.isRequired
 };
+
+var meanScore = 0;
 
 const styles = theme => ({
   root: {
@@ -58,14 +60,17 @@ class Results extends React.Component {
 
     var finalJSON = [];
     var jsonData = {};
+    var totalScore = 0;
     for (var i = 0; i < numDocuments; i++) {
+      totalScore += json["score"][i];
       jsonData = {
         name: json[Object.keys(json)[0]][i],
         score: json[Object.keys(json)[1]][i],
-        cuspi: json[Object.keys(json)[2]][i]
+        cusip: json[Object.keys(json)[2]][i]
       };
       finalJSON.push(jsonData);
     }
+    meanScore = totalScore / numDocuments;
     return finalJSON;
   }
 
@@ -78,6 +83,19 @@ class Results extends React.Component {
 
     resultsJSON = this.reformattingJSON(resultsJSON);
     console.log(resultsJSON);
+
+    //const sd = standarDeviation(resultsJSON);
+
+    const numDocuments = Object.keys(resultsJSON).length;
+    var sd = 0;
+
+    for (var i = 0; i < numDocuments; i++) {
+      sd += Math.pow(resultsJSON[i]["score"] - meanScore, 2);
+      console.log(sd);
+    }
+    sd = Math.pow((1 / numDocuments) * sd, 0.5);
+
+    console.log(sd);
 
     const { classes } = this.props;
     const { value } = this.state;
@@ -98,7 +116,9 @@ class Results extends React.Component {
           </AppBar>
 
           {// Tab 1 -> the table of results
-          value === 0 && <Table results={resultsJSON} />}
+          value === 0 && (
+            <DiversityScores results={resultsJSON} mean={meanScore} />
+          )}
           {value === 1 && <TabContainer>Item Two</TabContainer>}
         </div>
       </div>
