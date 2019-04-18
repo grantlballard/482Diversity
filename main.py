@@ -177,12 +177,6 @@ def authorize():
 
   return flask.redirect(authorization_url)
 
-
-@app.route("/results")
-def api_results():
-    return render_template("results.html")
-
-
 @app.route("/methods")
 def api_methods():
   return render_template("methods.html")
