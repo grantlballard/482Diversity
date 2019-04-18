@@ -1,39 +1,25 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  <title>Results</title>
+<title>Results</title>
 {% endblock %}
 
 {% block custom_javascript %}
-  <script src="{{ url_for('static', filename="js/Table.jsx")}}" type="text/javascript"></script>
-  
-  <!-- Don't use this in production: -->
-  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>  
-{% endblock %}  
+<link rel="stylesheet" href="{{ url_for('static', filename="css/results.css")}}">
+
+{% endblock %}
 
 {% block custom_css %}
-  <style>
-    .back-gray {
-      background-color: white;
-      position: relative;
-      padding: 10px;
-      z-index: 0;
-    }
 
-    #table-content {
-      background-color: whitesmoke;
-    }
-  </style>
-
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
 {% endblock %}
-  
+
 
 {% block content %}
-  <div class="back-gray">
-    <div class="container">
-      <div id="table-content" results="{{ resultsJSON }}" resultsLength="{{ resultsLen }}" />
-    </div>
-    <script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
+<div class="back-gray">
+  <div class="container">
+    <div id="table-content" results="{{ resultsJSON }}" diversitySD="{{ diversity_scores_std }}" diversityMean="{{ diversity_scores_mean }}" diversityHRCCorrelation="{{ diversity_and_hrc_correlation }}" financeResults="{{ finance_results_JSON }}" />
   </div>
+  <script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
+</div>
 {% endblock %}

@@ -3,6 +3,7 @@ from flask import Flask, render_template, json, request, session
 from apiclient import errors
 from apiclient import http
 
+import re
 import sys
 import os
 import flask
@@ -32,7 +33,6 @@ API_VERSION = 'v2'
 
 app = Flask(__name__)
 app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
-
 folderid = 'Diversity'
 
 def csv_string_to_df(string):
@@ -177,11 +177,6 @@ def authorize():
   return flask.redirect(authorization_url)
 
 
-@app.route("/results")
-def api_results():
-    return render_template("results.html")
-
-
 @app.route("/methods")
 def api_methods():
 	return render_template("methods.html")
@@ -212,7 +207,7 @@ def oauth2callback():
 
 
 # this route pulls files from the drive and generates the scores
-@app.route("/get_scores", methods=['GET', 'POST'])
+@app.route("/results", methods=['GET', 'POST'])
 def api_generate_scores():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
@@ -239,12 +234,16 @@ def api_generate_scores():
   diversity_scores_std = diversity_scores_df.std()
 
   merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+  print(merged.head())
+  print(financial_df.head())
   diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
   financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+  #re.sub("[^\d\.]", "", diversity_scores_mean)
+  diversity_scores_mean = diversity_scores_mean.values
+  diversity_scores_std = diversity_scores_std.values
 
   return render_template("results.html",
   					resultsJSON = diversity_scores_df.to_json(),
-  					resultsLen = 2,
   					diversity_scores_mean = diversity_scores_mean,
   					diversity_scores_std = diversity_scores_std,
   					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
@@ -253,4 +252,4 @@ def api_generate_scores():
 
 if __name__ == "__main__":
   os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-  app.run('localhost',8080,debug=True)
+  app.run('localhost',8000,debug=True)
