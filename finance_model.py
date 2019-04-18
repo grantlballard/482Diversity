@@ -84,7 +84,7 @@ def get_dataframe_pearson_correlations(financial_df, diversity_scores_df):
 
             # Append new row
             new_row = [stat, stat_mean, stat_std, diversity_correlation, diversity_p_val, hrc_correlation, hrc_p_val]
-            new_row = [round(val, 2) for val in new_row]
+            new_row = [round(val, 2) if not isinstance(val, str) else val for val in new_row]
             results.append(new_row)
     results = pd.DataFrame(results, columns=['Financial_Statistic', 'Mean', 'Std', 'Diversity_Correlation', 'Diversity_P_Value', 'HRC_Correlation', 'HRC_P_Value'])
     return results
