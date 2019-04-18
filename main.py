@@ -235,6 +235,8 @@ def api_generate_scores():
   diversity_scores_std = diversity_scores_df.std()
 
   merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+  print(merged.head())
+  print(financial_df.head())
   diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
   financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
   #re.sub("[^\d\.]", "", diversity_scores_mean)
