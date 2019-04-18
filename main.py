@@ -19,6 +19,11 @@ from apiclient import errors
 from apiclient import http
 import time
 
+if sys.version_info[0] < 3:
+    from StringIO import StringIO
+else:
+    from io import StringIO
+
 CLIENT_SECRETS_FILE = "client_secret.json"
 
 # Scope: read only from drive
@@ -31,6 +36,12 @@ app.secret_key = 'A0Zr98j23yX R~Xav!jmN]LWX@,?RT'
 
 folderid = 'Diversity'
 
+def csv_string_to_df(string):
+    string_io = StringIO(string)
+    df = pd.read_csv(string_io)
+    df.columns = map(str.lower, df.columns)
+    return df
+
 def get_file_wrapper(service, file_id):
   content = service.files().get_media(fileId=file_id).execute()
   content = content.decode("utf-8") if type(content) == bytes else content
@@ -39,6 +50,9 @@ def get_file_wrapper(service, file_id):
 
 '''
 This function finds the csv from the selected folder id. It returns the contents of that folder as a list
+
+Returns:
+    ([str], pd.DataFrame)
 '''
 def get_diversity_dictionary(service, folder_id):
   page_token = None
@@ -68,7 +82,7 @@ def get_diversity_dictionary(service, folder_id):
             count += 1
           if file['title'] == 'finance' or file['title'] == 'finance.csv':
             content = get_file_wrapper(service, child["id"])
-            content = content.split("\n")
+            content = csv_string_to_df(content)
             fincont = content
             count += 1
           if count == 2:
@@ -89,7 +103,6 @@ def get_diversity_dictionary(service, folder_id):
   and it in turn pulls out all text documents from the folder and adds them
   to a dictionary where the key is the company name and the value is the document's text content
 '''
-
 def get_document_collection(service, folder_id):
 	compdict = {}
 	page_token = None
@@ -117,8 +130,6 @@ def get_document_collection(service, folder_id):
 			print('An error occurred: %s' % error)
 			break
 	return compdict
-
-
 
 
 def credentials_to_dict(credentials):
@@ -214,7 +225,8 @@ def api_generate_scores():
       if item['title'] == 'Diversity':
          folderid = item['id']'''
 
-  diversity_dictionary,financial = get_diversity_dictionary(drive,folderid)
+  diversity_dictionary, financial_df = get_diversity_dictionary(drive,folderid)
+
 
   document_collection = get_document_collection(drive,folderid)
 
@@ -222,9 +234,6 @@ def api_generate_scores():
   diversity_scores_mean = diversity_scores_df.mean()
   diversity_scores_std = diversity_scores_df.std()
 
-  financial_df = pd.DataFrame([["00846U101", "86", "10", "10"],
-  														 ["00724F101", "71", "50",	"100"]],
-  														 columns = [const.CUSIP_COL, const.HRC_COL,	"Current_Assets",	"Total_Assets"])
   merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
   diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
   financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
