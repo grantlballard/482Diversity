@@ -32,8 +32,7 @@ API_SERVICE_NAME = 'drive'
 API_VERSION = 'v2'
 
 app = Flask(__name__)
-app.secret_key = 'A0Zr98j23yX R~Xav!jmN]LWX@,?RT'
-
+app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
 folderid = 'Diversity'
 
 def csv_string_to_df(string):
