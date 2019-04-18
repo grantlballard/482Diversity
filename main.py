@@ -3,7 +3,6 @@ from flask import Flask, render_template, json, request, session
 from apiclient import errors
 from apiclient import http
 
-import re
 import sys
 import os
 import flask
@@ -33,6 +32,7 @@ API_VERSION = 'v2'
 
 app = Flask(__name__)
 app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
+
 folderid = 'Diversity'
 
 def csv_string_to_df(string):
@@ -63,23 +63,23 @@ def get_diversity_dictionary(service, folder_id):
       param = {}
       if page_token:
         param['pageToken'] = page_token
-      children = service.children().list(folderId=folder_id, **param).execute()
+      children = service.children().list(folderId=folder_id,q="title contains 'dict' or title contains 'fin'", **param).execute()
       count = 0
       dictcont = []
       fincont = []
       for child in children.get('items', []):
         #print child
-        file = service.files().get(fileId=child['id']).execute()
+        file = service.files().get(fileId=child['id'],fields="fileExtension,id,title").execute()
         # Check if file is dictionary
         if file['fileExtension'] == "csv":
-          print(file['title'])
-          if file['title'] == 'dictionary.csv' or file['title'] == 'dictionary':
-            print("here")
+          #print(file['title'])
+          if file['title'].find('dict') != -1:
+            #print("here")
             content = get_file_wrapper(service, child["id"])
             content = content.replace("\n", ",").split(",")
             dictcont = content
             count += 1
-          if file['title'] == 'finance' or file['title'] == 'finance.csv':
+          if file['title'].find('finan') != -1:
             content = get_file_wrapper(service, child["id"])
             content = csv_string_to_df(content)
             fincont = content
@@ -89,7 +89,7 @@ def get_diversity_dictionary(service, folder_id):
           #return content
         else:
           print("SCOREFILE")
-      page_token = children.get('nextPageToken')
+      #page_token = children.get('nextPageToken')
       if not page_token:
         break
     except errors.HttpError as error:
@@ -103,32 +103,33 @@ def get_diversity_dictionary(service, folder_id):
   to a dictionary where the key is the company name and the value is the document's text content
 '''
 def get_document_collection(service, folder_id):
-	compdict = {}
-	page_token = None
-	while True:
-		try:
-			param = {}
-			if page_token:
-				param['pageToken'] = page_token
-			children = service.children().list(
-				folderId=folder_id, **param).execute()
-			for child in children.get('items', []):
-				#print child
-				file = service.files().get(fileId=child['id']).execute()
-				# Check if file is dictionary
-				if 'fileExtension' in file and file['fileExtension'] == "txt":
-					comp_name = file['title']
-					content = get_file_wrapper(service, child["id"])
-					content = dsm.tokenize(content)
-					content = dsm.tokenized_to_ngram(content, 2)
-					compdict[comp_name] = content
-			page_token = children.get('nextPageToken')
-			if not page_token:
-				break
-		except errors.HttpError as error:
-			print('An error occurred: %s' % error)
-			break
-	return compdict
+  compdict = {}
+  page_token = None
+  while True:
+    try:
+      param = {}
+      if page_token:
+        param['pageToken'] = page_token
+      children = service.children().list(
+        folderId=folder_id, **param).execute()
+      for child in children.get('items', []):
+        #print child
+        file = service.files().get(fileId=child['id'],fields="fileExtension,id,title").execute()
+        # Check if file is dictionary
+        if 'fileExtension' in file and file['fileExtension'] == "txt":
+          comp_name = file['title']
+          content = get_file_wrapper(service, child["id"])
+          content = dsm.tokenize(content)
+          content = dsm.tokenized_to_ngram(content, 2)
+          print(comp_name)
+          compdict[comp_name] = content
+      #page_token = children.get('nextPageToken')
+      if not page_token:
+        break
+    except errors.HttpError as error:
+      print('An error occurred: %s' % error)
+      break
+  return compdict
 
 
 def credentials_to_dict(credentials):
@@ -177,9 +178,14 @@ def authorize():
   return flask.redirect(authorization_url)
 
 
+@app.route("/results")
+def api_results():
+    return render_template("results.html")
+
+
 @app.route("/methods")
 def api_methods():
-	return render_template("methods.html")
+  return render_template("methods.html")
 
 
 #oath route, called when the user isn't currently logged into a drive account
@@ -207,7 +213,7 @@ def oauth2callback():
 
 
 # this route pulls files from the drive and generates the scores
-@app.route("/results", methods=['GET', 'POST'])
+@app.route("/get_scores", methods=['GET', 'POST'])
 def api_generate_scores():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
@@ -228,28 +234,26 @@ def api_generate_scores():
 
 
   document_collection = get_document_collection(drive,folderid)
+  print("doc collection returned")
 
   diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
   diversity_scores_mean = diversity_scores_df.mean()
   diversity_scores_std = diversity_scores_df.std()
-
   merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
-  print(merged.head())
-  print(financial_df.head())
   diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
   financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
-  #re.sub("[^\d\.]", "", diversity_scores_mean)
-  diversity_scores_mean = diversity_scores_mean.values
-  diversity_scores_std = diversity_scores_std.values
-
+  #print(merged)
+  #print(financial_scores_df)
+  #print(diversity_and_hrc_correlation)
   return render_template("results.html",
-  					resultsJSON = diversity_scores_df.to_json(),
-  					diversity_scores_mean = diversity_scores_mean,
-  					diversity_scores_std = diversity_scores_std,
-  					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
-  					finance_results_JSON = financial_scores_df.to_json()
-  					)
+            resultsJSON = diversity_scores_df.to_json(),
+            resultsLen = 2,
+            diversity_scores_mean = diversity_scores_mean,
+            diversity_scores_std = diversity_scores_std,
+            diversity_and_hrc_correlation = diversity_and_hrc_correlation,
+            finance_results_JSON = financial_scores_df.to_json()
+            )
 
 if __name__ == "__main__":
   os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-  app.run('localhost',8000,debug=True)
+  app.run('localhost',8080,debug=True)
