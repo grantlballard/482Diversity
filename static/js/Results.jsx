@@ -8,6 +8,7 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import DiversityScores from "./DiversityScores.jsx";
+import BusinessCorrelations from "./BusinessCorrelations.jsx";
 
 function TabContainer(props) {
   return (
@@ -55,13 +56,13 @@ class Results extends React.Component {
     // get the name of the first column (comp_name in this case) so that we can
     // get the length of how many keys it has
     const firstColumn = Object.keys(json)[0];
-    const numDocuments = Object.keys(json[firstColumn]).length;
+    const numRows = Object.keys(json[firstColumn]).length;
     const numColumns = Object.keys(json).length;
 
     var finalJSON = [];
     var jsonData = {};
     var totalScore = 0;
-    for (var i = 0; i < numDocuments; i++) {
+    for (var i = 0; i < numRows; i++) {
       totalScore += json["score"][i];
       jsonData = {
         name: json[Object.keys(json)[0]][i],
@@ -70,7 +71,32 @@ class Results extends React.Component {
       };
       finalJSON.push(jsonData);
     }
-    meanScore = totalScore / numDocuments;
+    meanScore = totalScore / numRows;
+    return finalJSON;
+  }
+
+  reformattingJSONFinance(json) {
+    // get the name of the first column (comp_name in this case) so that we can
+    // get the length of how many keys it has
+    const firstColumn = Object.keys(json)[0];
+    const numRows = Object.keys(json[firstColumn]).length;
+    const numColumns = Object.keys(json).length;
+
+    var finalJSON = [];
+    var jsonData = {};
+    var totalScore = 0;
+    for (var i = 0; i < numRows; i++) {
+      jsonData = {
+        stat: json[Object.keys(json)[0]][i],
+        mean: json[Object.keys(json)[1]][i],
+        sd: json[Object.keys(json)[2]][i],
+        diversityCorrelation: json[Object.keys(json)[3]][i],
+        diversityP: json[Object.keys(json)[4]][i],
+        hrcCorrelation: json[Object.keys(json)[5]][i],
+        hrcP: json[Object.keys(json)[6]][i]
+      };
+      finalJSON.push(jsonData);
+    }
     return finalJSON;
   }
 
@@ -84,18 +110,25 @@ class Results extends React.Component {
     resultsJSON = this.reformattingJSON(resultsJSON);
     console.log(resultsJSON);
 
-    //const sd = standarDeviation(resultsJSON);
+    const diversityMean = this.props.diversityMean.replace(/[\[\]']+/g, "");
+    const diversitySD = this.props.diversitySD.replace(/[\[\]']+/g, "");
+
+    console.log(this.props.financeResults);
+
+    var financeResults = JSON.parse(this.props.financeResults);
+    console.log(financeResults);
+
+    financeResults = this.reformattingJSONFinance(financeResults);
+
+    console.log(financeResults);
 
     const numDocuments = Object.keys(resultsJSON).length;
     var sd = 0;
 
     for (var i = 0; i < numDocuments; i++) {
       sd += Math.pow(resultsJSON[i]["score"] - meanScore, 2);
-      console.log(sd);
     }
     sd = Math.pow((1 / numDocuments) * sd, 0.5);
-
-    console.log(sd);
 
     const { classes } = this.props;
     const { value } = this.state;
@@ -117,9 +150,14 @@ class Results extends React.Component {
 
           {// Tab 1 -> the table of results
           value === 0 && (
-            <DiversityScores results={resultsJSON} mean={meanScore} />
+            <DiversityScores
+              results={resultsJSON}
+              mean={diversityMean}
+              std={diversitySD}
+              HRC={this.props.diversityHRCCorrelation}
+            />
           )}
-          {value === 1 && <TabContainer>Item Two</TabContainer>}
+          {value === 1 && <BusinessCorrelations results={financeResults} />}
         </div>
       </div>
     );

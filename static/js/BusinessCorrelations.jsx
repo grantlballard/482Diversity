@@ -25,12 +25,38 @@ const styles = theme => ({
   }
 });
 
-class DiversityScores extends React.Component {
+class BusinessCorrelations extends React.Component {
   render() {
     const columns = [
       {
-        Header: "Company Name",
-        accessor: "name",
+        Header: "Statistic",
+        accessor: "stat",
+        Cell: props => (
+          <div
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
+      },
+      {
+        Header: "Mean",
+        accessor: "mean",
+        Cell: props => (
+          <div
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
+      },
+      {
+        Header: "Standard Deviation",
+        accessor: "sd",
         Cell: props => (
           <div
             className="number"
@@ -43,8 +69,8 @@ class DiversityScores extends React.Component {
         )
       },
       {
-        Header: "Cusip",
-        accessor: "cusip",
+        Header: "Diversity Correlation",
+        accessor: "diversityCorrelation",
         Cell: props => (
           <div
             className="number"
@@ -57,8 +83,36 @@ class DiversityScores extends React.Component {
         )
       },
       {
-        Header: "Score",
-        accessor: "score",
+        Header: "Diversity P Value",
+        accessor: "diversityP",
+        Cell: props => (
+          <div
+            className="number"
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
+      },
+      {
+        Header: "HRC Correlation",
+        accessor: "hrcCorrelation",
+        Cell: props => (
+          <div
+            className="number"
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </div>
+        )
+      },
+      {
+        Header: "HRC P Value",
+        accessor: "hrcP",
         Cell: props => (
           <div
             className="number"
@@ -85,26 +139,10 @@ class DiversityScores extends React.Component {
                 width="70"
               />
             </div>
-            <div className="col-7">
+            <div className="col-8">
               <h3 className="col-9 horizontal-centered">
                 How are scores generated?
               </h3>
-            </div>
-            <div className="col-4">
-              <div className="row">
-                <div className="col-4" style={{ textAlign: "center" }}>
-                  <h3> {this.props.mean} </h3>
-                  <h6> Mean </h6>
-                </div>
-                <div className="col-4" style={{ textAlign: "center" }}>
-                  <h3> {this.props.std} </h3>
-                  <h6> SD σ </h6>
-                </div>
-                <div className="col-4" style={{ textAlign: "center" }}>
-                  <h3> {this.props.HRC} </h3>
-                  <h6> HRC </h6>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -116,8 +154,8 @@ class DiversityScores extends React.Component {
   }
 }
 
-DiversityScores.propTypes = {
+BusinessCorrelations.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(DiversityScores);
+export default withStyles(styles)(BusinessCorrelations);

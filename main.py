@@ -3,6 +3,7 @@ from flask import Flask, render_template, json, request, session
 from apiclient import errors
 from apiclient import http
 
+import re
 import sys
 import os
 import flask
@@ -166,11 +167,6 @@ def authorize():
   return flask.redirect(authorization_url)
 
 
-# @app.route("/results")
-# def api_results():
-#     return render_template("results.html")
-
-
 @app.route("/methods")
 def api_methods():
 	return render_template("methods.html")
@@ -232,10 +228,12 @@ def api_generate_scores():
   merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
   diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
   financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+  #re.sub("[^\d\.]", "", diversity_scores_mean)
+  diversity_scores_mean = diversity_scores_mean.values
+  diversity_scores_std = diversity_scores_std.values
 
   return render_template("results.html",
   					resultsJSON = diversity_scores_df.to_json(),
-  					resultsLen = 2,
   					diversity_scores_mean = diversity_scores_mean,
   					diversity_scores_std = diversity_scores_std,
   					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
