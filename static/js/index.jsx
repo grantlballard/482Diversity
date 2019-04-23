@@ -8,9 +8,18 @@ import "react-table/react-table.css";
 ReactDOM.render(
   <Results
     results={document.getElementById("table-content").getAttribute("results")}
-    resultsLength={document
+    diversitySD={document
       .getElementById("table-content")
-      .getAttribute("resultsLength")}
+      .getAttribute("diversitySD")}
+    diversityMean={document
+      .getElementById("table-content")
+      .getAttribute("diversityMean")}
+    diversityHRCCorrelation={document
+      .getElementById("table-content")
+      .getAttribute("diversityHRCCorrelation")}
+    financeResults={document
+      .getElementById("table-content")
+      .getAttribute("financeResults")}
   />,
   document.getElementById("table-content")
 );

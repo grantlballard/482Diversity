@@ -1,0 +1,17 @@
+.back-gray {
+  background-color: white;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  padding-top: 40px;
+}
+
+#table-content {
+  background-color: whitesmoke;
+}
+
+.horizontal-centered {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}

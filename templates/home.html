@@ -1,164 +1,162 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  <title>Diversity Mining</title>
+<title>Diversity Mining</title>
 {% endblock %}
 
 {% block custom_javascript %}
-  <script>
-    var developerKey = "{{ DEVELOPER_KEY }}";
-    // The Client ID obtained from the Google API Console. Replace with your own Client ID.
-    var clientId = '130610955392-4nlg811kl98fc2etljlfrtf1e79jjp70.apps.googleusercontent.com';
+<script>
+  var developerKey = "{{ DEVELOPER_KEY }}";
+  // The Client ID obtained from the Google API Console. Replace with your own Client ID.
+  var clientId = '130610955392-4nlg811kl98fc2etljlfrtf1e79jjp70.apps.googleusercontent.com';
 
-    // Scope to use to access user's photos.
-    var scope = 'https://www.googleapis.com/auth/drive.file';
+  // Scope to use to access user's photos.
+  var scope = 'https://www.googleapis.com/auth/drive.file';
 
-    var pickerApiLoaded = false;
-    var oauthToken;
+  var pickerApiLoaded = false;
+  var oauthToken;
 
-    // Use the API Loader script to load google.picker and gapi.auth.
-    function onApiLoad() {
-      //Console.log("here");
-      gapi.load('auth2', onAuthApiLoad);
-      gapi.load('picker', onPickerApiLoad);
-    }
+  // Use the API Loader script to load google.picker and gapi.auth.
+  function onApiLoad() {
+    //Console.log("here");
+    gapi.load('auth2', onAuthApiLoad);
+    gapi.load('picker', onPickerApiLoad);
+  }
 
-    function onAuthApiLoad() {
-      //Console.log("here");
-      var authBtn = document.getElementById('auth');
-      authBtn.disabled = false;
-      authBtn.addEventListener('click', function() {
-        gapi.auth2.authorize({
-          client_id: clientId,
-          scope: scope
-        }, handleAuthResult);
-      });
-    }
+  function onAuthApiLoad() {
+    //Console.log("here");
+    var authBtn = document.getElementById('auth');
+    authBtn.disabled = false;
+    authBtn.addEventListener('click', function() {
+      gapi.auth2.authorize({
+        client_id: clientId,
+        scope: scope
+      }, handleAuthResult);
+    });
+  }
 
-    function onPickerApiLoad() {
-      pickerApiLoaded = true;
+  function onPickerApiLoad() {
+    pickerApiLoaded = true;
+    createPicker();
+  }
+
+  function handleAuthResult(authResult) {
+    if (authResult && !authResult.error) {
+      oauthToken = authResult.access_token;
       createPicker();
     }
+  }
 
-    function handleAuthResult(authResult) {
-      if (authResult && !authResult.error) {
-        oauthToken = authResult.access_token;
-        createPicker();
-      }
+  // Create and render a Picker object for picking user Photos.
+  function createPicker() {
+    if (pickerApiLoaded && oauthToken) {
+      var docsView = new google.picker.DocsView().
+      setIncludeFolders(true).
+      setSelectFolderEnabled(true);
+
+      var picker = new google.picker.PickerBuilder().
+      //addView(google.picker.ViewId.FOLDERS).
+      enableFeature(google.picker.Feature.MINE_ONLY).
+      enableFeature(google.picker.Feature.NAV_HIDDEN).
+      setOAuthToken(oauthToken).
+      setDeveloperKey(developerKey).
+      addView(docsView).
+      setCallback(pickerCallback).
+      build();
+      picker.setVisible(true);
+    }
+  }
+
+  // A simple callback implementation.
+  function pickerCallback(data) {
+    var folderid = 'nothing';
+    if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+      var doc = data[google.picker.Response.DOCUMENTS][0];
+      folderid = doc[google.picker.Document.ID];
+    } else {
+      return;
     }
 
-    // Create and render a Picker object for picking user Photos.
-    function createPicker() {
-      if (pickerApiLoaded && oauthToken) {
-        var docsView = new google.picker.DocsView().
-                              setIncludeFolders(true).
-                              setSelectFolderEnabled(true);
+    var http = new XMLHttpRequest();
+    var url = '/upload_folder';
+    http.open('POST', url, true)
 
-        var picker = new google.picker.PickerBuilder().
-            //addView(google.picker.ViewId.FOLDERS).
-            enableFeature(google.picker.Feature.MINE_ONLY).
-            enableFeature(google.picker.Feature.NAV_HIDDEN).
-            setOAuthToken(oauthToken).
-            setDeveloperKey(developerKey).
-            addView(docsView).
-            setCallback(pickerCallback).
-            build();
-        picker.setVisible(true);
+    http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    http.onreadystatechange = function() {
+      if (http.readyState == 4 && http.status == 200) {
+        document.getElementById('getscores').submit()
       }
     }
-
-    // A simple callback implementation.
-    function pickerCallback(data) {
-      var folderid = 'nothing';
-      if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-        var doc = data[google.picker.Response.DOCUMENTS][0];
-        folderid = doc[google.picker.Document.ID];
-      }
-      else{
-        return;
-      }
-
-      var http = new XMLHttpRequest();
-      var url = '/upload_folder';
-      http.open('POST',url,true)
-
-      http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-          http.onreadystatechange = function() {
-              if(http.readyState == 4 && http.status == 200) {
-                  document.getElementById('getscores').submit()
-              }
-          }
-      http.send("folder="+folderid);
-
-      
+    http.send("folder=" + folderid);
 
 
-      //var message = 'You picked: ' + url;
-      //document.getElementById('result').innerHTML = message;
-    }
-  </script>
-  <script type="text/babel" src="{{ url_for('static', filename="js/reactComponent.js")}}"></script>
-{% endblock %} 
-    
-{% block custom_css %}
-  <link rel="stylesheet" href="{{ url_for('static', filename="css/home.css")}}"></link>
-{% endblock %}    
-  
-{% block content %}
- <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
-  <script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
-  <div id="home-div">
-
-      <div class="container">
-        <div class="row justify-content-md-center">
-          <div class="col col-md-auto">
-            <h1 class="text-center" style="color: white">Diversity Mining</h1>
-            <br />
-            <p style="color: white; text-align: center">
-              In this project we aim to create diversity scores for fortune 500
-              companies. We are doing this by creating a dictionary of
-              diversity-related words and phrases and using this dictionary to
-              score each company. We are then going to use these scores to
-              predict financial performance for the companies.
-            </p>
-            <br />
-            <br />
-
-            <form method="post" id="getscores" action="/get_scores">
-            <input type="submit" style="display:none" name="submitbutton" value="Generate Scores"> 
-            <button type="button" id="auth" class="button-white center">Generate Scores</button>
 
 
-            </input>
-          </form>
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="back-gray">
-    <div class="container">
-      <div class="row justify-content-md-center">
-        <div class="col col-md-auto">
-          <img style="padding-right: 15px" height="150px" src="http://www.iconarchive.com/download/i103757/blackvariant/button-ui-ms-office-2016/Excel-2.ico" />
-        </div>
-        <div class="col col-md-auto d-flex align-content-md-center flex-wrap">
-          <h4>
-            Instructions
-          </h4>
-        </div>
-      </div>
-      <div class="row justify-content-md-center">
-        <div class="col col-md-auto">
-          Press the generate scores button and select a folder
-          in your google drive that contains the diversity
-          dictionary, financial data, and the documents you want to
-          score.
-        </div>
-      </div>
-    </div>
-  </div>
+    //var message = 'You picked: ' + url;
+    //document.getElementById('result').innerHTML = message;
+  }
+</script>
+<script type="text/babel" src="{{ url_for('static', filename="js/reactComponent.js")}}"></script>
 {% endblock %}
 
-  
+{% block custom_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename="css/home.css")}}">
+</link>
+{% endblock %}
+
+{% block content %}
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+<script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
+<div id="home-div">
+
+  <div class="container">
+    <div class="row justify-content-md-center">
+      <div class="col col-md-auto">
+        <h1 class="text-center" style="color: white">Diversity Mining</h1>
+        <br />
+        <p style="color: white; text-align: center">
+          In this project we aim to create diversity scores for fortune 500
+          companies. We are doing this by creating a dictionary of
+          diversity-related words and phrases and using this dictionary to
+          score each company. We are then going to use these scores to
+          predict financial performance for the companies.
+        </p>
+        <br />
+        <br />
+
+        <form method="post" id="getscores" action="/results">
+          <input type="submit" style="display:none" name="submitbutton" value="Generate Scores">
+          <button type="button" id="auth" class="button-white center">Generate Scores</button>
+
+
+          </input>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="back-gray">
+  <div class="container">
+    <div class="row justify-content-md-center">
+      <div class="col col-md-auto">
+        <img style="padding-right: 15px" height="150px" src="http://www.iconarchive.com/download/i103757/blackvariant/button-ui-ms-office-2016/Excel-2.ico" />
+      </div>
+      <div class="col col-md-auto d-flex align-content-md-center flex-wrap">
+        <h4>
+          Instructions
+        </h4>
+      </div>
+    </div>
+    <div class="row justify-content-md-center">
+      <div class="col col-md-auto">
+        Press the generate scores button and select a folder
+        in your google drive that contains the diversity
+        dictionary, financial data, and the documents you want to
+        score.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

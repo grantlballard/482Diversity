@@ -3,6 +3,7 @@ from flask import Flask, render_template, json, request, session
 from apiclient import errors
 from apiclient import http
 
+import re
 import sys
 import os
 import flask
@@ -18,6 +19,11 @@ from apiclient import errors
 from apiclient import http
 import time
 
+if sys.version_info[0] < 3:
+    from StringIO import StringIO
+else:
+    from io import StringIO
+
 CLIENT_SECRETS_FILE = "client_secret.json"
 
 # Scope: read only from drive
@@ -27,8 +33,13 @@ API_VERSION = 'v2'
 
 app = Flask(__name__)
 app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
-
 folderid = 'Diversity'
+
+def csv_string_to_df(string):
+    string_io = StringIO(string)
+    df = pd.read_csv(string_io)
+    df.columns = map(str.lower, df.columns)
+    return df
 
 def get_file_wrapper(service, file_id):
   content = service.files().get_media(fileId=file_id).execute()
@@ -38,6 +49,9 @@ def get_file_wrapper(service, file_id):
 
 '''
 This function finds the csv from the selected folder id. It returns the contents of that folder as a list
+
+Returns:
+    ([str], pd.DataFrame)
 '''
 def get_diversity_dictionary(service, folder_id):
   page_token = None
@@ -67,7 +81,11 @@ def get_diversity_dictionary(service, folder_id):
             count += 1
           if file['title'] == 'finance' or file['title'] == 'finance.csv':
             content = get_file_wrapper(service, child["id"])
+<<<<<<< HEAD
             content = pd.read_csv(pd.compat.StringIO(content))
+=======
+            content = csv_string_to_df(content)
+>>>>>>> b504f695d1b3f439ec997bc0b88e0134c814c276
             fincont = content
             count += 1
           if count == 2:
@@ -117,8 +135,6 @@ def get_document_collection(service, folder_id):
 	return compdict
 
 
-
-
 def credentials_to_dict(credentials):
   return {'token': credentials.token,
           'refresh_token': credentials.refresh_token,
@@ -165,11 +181,6 @@ def authorize():
   return flask.redirect(authorization_url)
 
 
-@app.route("/results")
-def api_results():
-    return render_template("results.html")
-
-
 @app.route("/methods")
 def api_methods():
 	return render_template("methods.html")
@@ -200,48 +211,49 @@ def oauth2callback():
 
 
 # this route pulls files from the drive and generates the scores
-@app.route("/get_scores", methods=['GET', 'POST'])
+@app.route("/results", methods=['GET', 'POST'])
 def api_generate_scores():
-	if 'credentials' not in flask.session:
-		return flask.redirect('authorize')
-	credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
+  if 'credentials' not in flask.session:
+    return flask.redirect('authorize')
+  credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
-	drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+  drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-	folderid = flask.session['fid']
+  folderid = flask.session['fid']
 
-	'''
-	files = drive.files().list().execute()
-		folderid = ''
-		for item  in files['items']:
-			if item['title'] == 'Diversity':
-					folderid = item['id']'''
+  '''
+  files = drive.files().list().execute()
+    folderid = ''
+    for item  in files['items']:
+      if item['title'] == 'Diversity':
+         folderid = item['id']'''
 
-	diversity_dictionary, financial_df = get_diversity_dictionary(drive,folderid)
-	document_collection = get_document_collection(drive,folderid)
+  diversity_dictionary, financial_df = get_diversity_dictionary(drive,folderid)
 
-	diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-	diversity_scores_mean = diversity_scores_df.mean()
-	diversity_scores_std = diversity_scores_df.std()
 
-	# Clean dataframes
-	financial_df.columns = map(str.lower, financial_df.columns)
-	diversity_scores_df.columns = map(str.lower, diversity_scores_df.columns)
-	
+  document_collection = get_document_collection(drive,folderid)
 
-	merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
-	diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
-	financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+  diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+  diversity_scores_mean = diversity_scores_df.mean()
+  diversity_scores_std = diversity_scores_df.std()
 
-	return render_template("results.html", 
-						resultsJSON = diversity_scores_df.to_json(), 
-						resultsLen = 2,
-						diversity_scores_mean = diversity_scores_mean, 
-						diversity_scores_std = diversity_scores_std,
-						diversity_and_hrc_correlation = diversity_and_hrc_correlation,
-						finance_results_JSON = financial_scores_df.to_json() 
-						)
+  merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+  print(merged.head())
+  print(financial_df.head())
+  diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
+  financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+  #re.sub("[^\d\.]", "", diversity_scores_mean)
+  diversity_scores_mean = diversity_scores_mean.values
+  diversity_scores_std = diversity_scores_std.values
+
+  return render_template("results.html",
+  					resultsJSON = diversity_scores_df.to_json(),
+  					diversity_scores_mean = diversity_scores_mean,
+  					diversity_scores_std = diversity_scores_std,
+  					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
+  					finance_results_JSON = financial_scores_df.to_json()
+  					)
 
 if __name__ == "__main__":
   os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-  app.run('localhost',8080,debug=True)
+  app.run('localhost',8000,debug=True)
