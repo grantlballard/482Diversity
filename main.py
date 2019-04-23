@@ -81,11 +81,7 @@ def get_diversity_dictionary(service, folder_id):
             count += 1
           if file['title'] == 'finance' or file['title'] == 'finance.csv':
             content = get_file_wrapper(service, child["id"])
-<<<<<<< HEAD
-            content = pd.read_csv(pd.compat.StringIO(content))
-=======
             content = csv_string_to_df(content)
->>>>>>> b504f695d1b3f439ec997bc0b88e0134c814c276
             fincont = content
             count += 1
           if count == 2:
