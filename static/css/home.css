@@ -1,6 +1,6 @@
 #home-div {
     background-color: dodgerblue;
-    height: 500px;
+    height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -12,10 +12,11 @@
   .back-gray {
     background-color: whitesmoke;
     height: 300px;
-    padding-top: 40px;
+    padding-top: 20px;
   }
   .white-text {
     color: white;
+    font-size: 18px;
   }
   .center {
     margin: 0 auto;
@@ -23,7 +24,7 @@
   }
   .button-white {
     color: white;
-    background-color: transparent;
+    background-color: dodgerblue;
     background-image: none;
     border-color: #fff !important;
     border: 2px solid transparent;
@@ -42,4 +43,16 @@
     margin: auto;
     align-self: center;
     width: 50%;
+  }
+  ol{
+    font-size: 18px;
+
+    text-align: left;
+
+  }
+
+
+  ol li{
+    text-align: left;
+
   }
