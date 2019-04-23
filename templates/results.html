@@ -18,7 +18,7 @@
 {% block content %}
 <div class="back-gray">
   <div class="container">
-    <div id="table-content" results="{{ resultsJSON }}" diversitySD="{{ diversity_scores_std }}" diversityMean="{{ diversity_scores_mean }}" diversityHRCCorrelation="{{ diversity_and_hrc_correlation }}" financeResults="{{ finance_results_JSON }}" />
+    <div id="table-content" results="{{ resultsJSON }}" diversitySD="{{ diversity_scores_std }}" diversityMean="{{ diversity_scores_mean }}" diversityHRCCorrelation="{{ diversity_and_hrc_correlation }}" diversityHRCPVal = "{{ diversity_and_hrc_p_val }}" financeResults="{{ finance_results_JSON }}" />
   </div>
   <script src="{{ url_for('static', filename="js/bundle.js")}}" type="text/javascript"></script>
 </div>

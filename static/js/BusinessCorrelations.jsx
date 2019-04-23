@@ -141,7 +141,7 @@ class BusinessCorrelations extends React.Component {
             </div>
             <div className="col-8">
               <h3 className="col-9 horizontal-centered">
-                How are scores generated?
+                <a href="/methods">How are scores generated?</a>
               </h3>
             </div>
           </div>

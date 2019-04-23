@@ -154,7 +154,8 @@ class Results extends React.Component {
               results={resultsJSON}
               mean={diversityMean}
               std={diversitySD}
-              HRC={this.props.diversityHRCCorrelation}
+              hrc_correlation={this.props.diversityHRCCorrelation}
+              hrc_p_val = {this.props.diversityHRCPVal}
             />
           )}
           {value === 1 && <BusinessCorrelations results={financeResults} />}
