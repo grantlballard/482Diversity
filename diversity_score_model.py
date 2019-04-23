@@ -163,7 +163,7 @@ def get_collection_diversity_scores(diversity_dictionary, document_collection):
     for file_title, document in document_collection:
         # Get new row values
         comp_name, comp_cusip = parse_file_title(file_title)
-        diversity_score = get_document_diversity_score(diversity_dictionary, document, doc_collect)
+        diversity_score = round(get_document_diversity_score(diversity_dictionary, document, doc_collect),2)
 
         # Append new row
         new_row = [comp_name, diversity_score, comp_cusip]
