@@ -70,9 +70,11 @@
   // A simple callback implementation.
   function pickerCallback(data) {
     var folderid = 'nothing';
+    var modified_time = 'nothing'; 
     if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
       var doc = data[google.picker.Response.DOCUMENTS][0];
       folderid = doc[google.picker.Document.ID];
+      modified_time = doc[google.picker.Document.LAST_EDITED_UTC];
     } else {
       return;
     }
@@ -87,7 +89,8 @@
         document.getElementById('getscores').submit()
       }
     }
-    http.send("folder=" + folderid);
+    http.send("folder=" + folderid + "&" +
+              "modified_time=" + modified_time);
 
 
 

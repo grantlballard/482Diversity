@@ -17,6 +17,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 from apiclient import errors
 from apiclient import http
+from collections import OrderedDict
 import time
 
 if sys.version_info[0] < 3:
@@ -34,6 +35,8 @@ API_VERSION = 'v2'
 app = Flask(__name__)
 app.secret_key = os.environ["DIVERSITY_GOOGLE_API_KEY"]
 folderid = 'Diversity'
+CACHE = OrderedDict()
+
 
 def csv_string_to_df(string):
     string_io = StringIO(string)
@@ -46,6 +49,35 @@ def get_file_wrapper(service, file_id):
   content = content.decode("utf-8") if type(content) == bytes else content
   content = content.strip()
   return content
+
+def score_drive(folder_id, modified_time):
+  """
+  Params:
+    folder_id:      str. Google Drive folder id to score
+    modified_time:  str. Modified time of google drive
+  Returns:
+    (pd.DataFrame, pd.DataFrame, (double, double)). Diversity scores dataframe, financial scores dataframe, correlation and p-val for diversity-hrc correlation
+  """
+  arguments_hash = folder_id + "_" + modified_time
+  if arguments_hash in CACHE:
+    return CACHE[arguments_hash]
+  
+  credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
+  drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+
+  diversity_dictionary, financial_df = get_diversity_dictionary(drive, folder_id)
+  document_collection = get_document_collection(drive,folder_id)
+  diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
+  financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+  merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
+  diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
+
+  return_tuple = (diversity_scores_df, financial_scores_df, diversity_and_hrc_correlation)
+  if len(CACHE) > 0 and len(CACHE) > const.CACHE_SIZE:
+    CACHE.popitem(last=False)
+  CACHE[arguments_hash] = return_tuple
+
+  return return_tuple
 
 '''
 This function finds the csv from the selected folder id. It returns the contents of that folder as a list
@@ -145,10 +177,11 @@ def api_home():
 def upload_folder():
     d_content  = request.form
     d_content = d_content.to_dict()
+
     fid = d_content['folder']
+    modified_time = d_content['modified_time']
     flask.session['fid'] = fid
-    #folderid = ''.join(d_content['folder'])
-    #print(folderid)
+    flask.session['modified_time'] = modified_time
 
     return 'response'
 
@@ -203,44 +236,22 @@ def oauth2callback():
   return flask.redirect(flask.url_for('api_generate_scores'))
 
 
+
 # this route pulls files from the drive and generates the scores
 @app.route("/results", methods=['GET', 'POST'])
 def api_generate_scores():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
-  credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
-  drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-  folderid = flask.session['fid']
-  moddate = drive.files().get(fileId=folderid).execute()['modifiedDate']
-  print(moddate)
-  '''
-  files = drive.files().list().execute()
-    folderid = ''
-    for item  in files['items']:
-      if item['title'] == 'Diversity':
-         folderid = item['id']'''
-
-  diversity_dictionary, financial_df = get_diversity_dictionary(drive,folderid)
-
-
-  document_collection = get_document_collection(drive,folderid)
-
-  diversity_scores_df = dsm.get_collection_diversity_scores(diversity_dictionary, document_collection.items())
-  diversity_scores_mean = diversity_scores_df.mean()
-  diversity_scores_std = diversity_scores_df.std()
-
-  merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
-  diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
-  rounded_correlation = round(diversity_and_hrc_correlation[0],2)
-  rounded_p_val =       round(diversity_and_hrc_correlation[1],2)
-  financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
+  folder_id = flask.session['fid']
+  modified_time = flask.session['modified_time']
+  diversity_scores_df, financial_scores_df, diversity_and_hrc_correlation = score_drive(folder_id, modified_time)
   
-  diversity_scores_mean = diversity_scores_mean.values
-  diversity_scores_std = diversity_scores_std.values
-  diversity_scores_mean[0] = round(diversity_scores_mean[0],2)
-  diversity_scores_std[0] = round(diversity_scores_std[0],2)
+  diversity_scores_mean = round(diversity_scores_df.mean().values[0], 2)
+  diversity_scores_std =  round(diversity_scores_df.std().values[0], 2)  
+  rounded_correlation =   round(diversity_and_hrc_correlation[0],2)
+  rounded_p_val =         round(diversity_and_hrc_correlation[1],2)
+
   return render_template("results.html",
             resultsJSON = diversity_scores_df.to_json(),
             diversity_scores_mean = diversity_scores_mean,
