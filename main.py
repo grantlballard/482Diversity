@@ -72,12 +72,12 @@ def get_diversity_dictionary(service, folder_id):
         # Check if file is dictionary
         if file['fileExtension'] == "csv":
           print(file['title'])
-          if file['title'] == 'dictionary.csv' or file['title'] == 'dictionary':
+          if file['title'].find('dict') != -1:
             content = get_file_wrapper(service, child["id"])
             content = content.replace("\n", ",").split(",")
             dictcont = content
             count += 1
-          if file['title'] == 'finance' or file['title'] == 'finance.csv':
+          if file['title'].find('finan') != -1:
             content = get_file_wrapper(service, child["id"])
             content = csv_string_to_df(content)
             fincont = content
@@ -149,6 +149,7 @@ def upload_folder():
     flask.session['fid'] = fid
     #folderid = ''.join(d_content['folder'])
     #print(folderid)
+
     return 'response'
 
 #authorize route, copied from google's flask tutorial
@@ -212,7 +213,8 @@ def api_generate_scores():
   drive = googleapiclient.discovery.build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
   folderid = flask.session['fid']
-
+  moddate = drive.files().get(fileId=folderid).execute()['modifiedDate']
+  print(moddate)
   '''
   files = drive.files().list().execute()
     folderid = ''
