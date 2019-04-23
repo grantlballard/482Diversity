@@ -57,7 +57,6 @@ def get_diversity_dictionary(service, folder_id):
   page_token = None
   counter = 0
   while True:
-    print("Counter: {}".format(counter))
     counter += 1
     try:
       param = {}
@@ -74,7 +73,6 @@ def get_diversity_dictionary(service, folder_id):
         if file['fileExtension'] == "csv":
           print(file['title'])
           if file['title'] == 'dictionary.csv' or file['title'] == 'dictionary':
-            print("here")
             content = get_file_wrapper(service, child["id"])
             content = content.replace("\n", ",").split(",")
             dictcont = content
@@ -87,8 +85,6 @@ def get_diversity_dictionary(service, folder_id):
           if count == 2:
             return dictcont,fincont
           #return content
-        else:
-          print("SCOREFILE")
       page_token = children.get('nextPageToken')
       if not page_token:
         break
@@ -234,8 +230,6 @@ def api_generate_scores():
   diversity_scores_std = diversity_scores_df.std()
 
   merged = pd.merge(diversity_scores_df, financial_df, on=const.CUSIP_COL)
-  print(merged.head())
-  print(financial_df.head())
   diversity_and_hrc_correlation = fm.get_pearson_correlation(merged[const.HRC_COL], merged[const.SCORE_COL])
   financial_scores_df = fm.get_dataframe_pearson_correlations(financial_df, diversity_scores_df)
   #re.sub("[^\d\.]", "", diversity_scores_mean)
