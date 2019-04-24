@@ -117,7 +117,7 @@
       <div class="col col-md-auto">
         <h1 class="text-center" style="color: white">Diversity Mining</h1>
         <br />
-        <p style="color: white; text-align: center">
+        <p style="color: white; text-align: center; font-size: 18px;">
           In this project we aim to create diversity scores for fortune 500
           companies. We are doing this by creating a dictionary of
           diversity-related words and phrases and using this dictionary to
@@ -126,14 +126,6 @@
         </p>
         <br />
         <br />
-
-        <form method="post" id="getscores" action="/results">
-          <input type="submit" style="display:none" name="submitbutton" value="Generate Scores">
-          <button type="button" id="auth" class="button-white center">Generate Scores</button>
-
-
-          </input>
-        </form>
 
       </div>
     </div>
@@ -144,22 +136,32 @@
   <div class="container">
     <div class="row justify-content-md-center">
       <div class="col col-md-auto">
-        <img style="padding-right: 15px" height="150px" src="http://www.iconarchive.com/download/i103757/blackvariant/button-ui-ms-office-2016/Excel-2.ico" />
+        <img style="padding-right: 15px" height="150px" src="{{ url_for('static', filename="img/google.png")}}"/>
       </div>
       <div class="col col-md-auto d-flex align-content-md-center flex-wrap">
-        <h4>
+        <h4 style="font-size: 30px">
           Instructions
         </h4>
       </div>
     </div>
     <div class="row justify-content-md-center">
       <div class="col col-md-auto">
-        Press the generate scores button and select a folder
-        in your google drive that contains the diversity
-        dictionary, financial data, and the documents you want to
-        score.
+        <ol>
+        <li>Prepare your google drive by creating a new folder. </li>
+        <li>In this folder add the financial information, the diversity ditionary, and the </li>
+        documents that you wish to score.
+        <li>The scoring files must be named in the format compname_cusip_type.</li>
+        <li>The dictinoary and financial csvs must contain dict and finan in their titles.</li>
+        <li>Press the generate scores button and select the folder that you just set up.</li>
       </div>
     </div>
+     <form method="post" id="getscores" action="/results">
+          <input type="submit" style="display:none" name="submitbutton" value="Generate Scores">
+          <button type="button" id="auth" class="button-white center">Generate Scores</button>
+
+
+          </input>
+        </form>
   </div>
 </div>
 {% endblock %}

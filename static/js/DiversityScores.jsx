@@ -87,22 +87,22 @@ class DiversityScores extends React.Component {
             </div>
             <div className="col-7">
               <h3 className="col-9 horizontal-centered">
-                How are scores generated?
+                <a href="/methods">How are scores generated?</a>
               </h3>
             </div>
             <div className="col-4">
               <div className="row">
                 <div className="col-4" style={{ textAlign: "center" }}>
                   <h3> {this.props.mean} </h3>
-                  <h6> Mean </h6>
+                  <h6> Mean μ </h6>
                 </div>
                 <div className="col-4" style={{ textAlign: "center" }}>
                   <h3> {this.props.std} </h3>
-                  <h6> SD σ </h6>
+                  <h6> STD σ </h6>
                 </div>
                 <div className="col-4" style={{ textAlign: "center" }}>
-                  <h3> {this.props.HRC} </h3>
-                  <h6> HRC </h6>
+                  <h3> {this.props.hrc_correlation},  {this.props.hrc_p_val}</h3>
+                  <h6> HRC correlation, p-value </h6>
                 </div>
               </div>
             </div>

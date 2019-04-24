@@ -17,6 +17,9 @@ ReactDOM.render(
     diversityHRCCorrelation={document
       .getElementById("table-content")
       .getAttribute("diversityHRCCorrelation")}
+    diversityHRCPVal={document
+      .getElementById("table-content")
+      .getAttribute("diversityHRCPVal")}
     financeResults={document
       .getElementById("table-content")
       .getAttribute("financeResults")}

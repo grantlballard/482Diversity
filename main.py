@@ -89,7 +89,6 @@ def get_diversity_dictionary(service, folder_id):
   page_token = None
   counter = 0
   while True:
-    print("Counter: {}".format(counter))
     counter += 1
     try:
       param = {}
@@ -105,13 +104,12 @@ def get_diversity_dictionary(service, folder_id):
         # Check if file is dictionary
         if file['fileExtension'] == "csv":
           print(file['title'])
-          if file['title'] == 'dictionary.csv' or file['title'] == 'dictionary':
-            print("here")
+          if file['title'].find('dict') != -1:
             content = get_file_wrapper(service, child["id"])
             content = content.replace("\n", ",").split(",")
             dictcont = content
             count += 1
-          if file['title'] == 'finance' or file['title'] == 'finance.csv':
+          if file['title'].find('finan') != -1:
             content = get_file_wrapper(service, child["id"])
             content = csv_string_to_df(content)
             fincont = content
@@ -119,8 +117,6 @@ def get_diversity_dictionary(service, folder_id):
           if count == 2:
             return dictcont,fincont
           #return content
-        else:
-          print("SCOREFILE")
       page_token = children.get('nextPageToken')
       if not page_token:
         break
@@ -246,21 +242,24 @@ def oauth2callback():
 def api_generate_scores():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
-  
+
   folder_id = flask.session['fid']
   modified_time = flask.session['modified_time']
   diversity_scores_df, financial_scores_df, diversity_and_hrc_correlation = score_drive(folder_id, modified_time)
-
-  diversity_scores_mean = diversity_scores_df.mean().values
-  diversity_scores_std = diversity_scores_df.std().values  
+  
+  diversity_scores_mean = round(diversity_scores_df.mean().values[0], 2)
+  diversity_scores_std =  round(diversity_scores_df.std().values[0], 2)  
+  rounded_correlation =   round(diversity_and_hrc_correlation[0],2)
+  rounded_p_val =         round(diversity_and_hrc_correlation[1],2)
 
   return render_template("results.html",
-  					resultsJSON = diversity_scores_df.to_json(),
-  					diversity_scores_mean = diversity_scores_mean,
-  					diversity_scores_std = diversity_scores_std,
-  					diversity_and_hrc_correlation = diversity_and_hrc_correlation,
-  					finance_results_JSON = financial_scores_df.to_json()
-  					)
+            resultsJSON = diversity_scores_df.to_json(),
+            diversity_scores_mean = diversity_scores_mean,
+            diversity_scores_std = diversity_scores_std,
+            diversity_and_hrc_correlation = rounded_correlation,
+            diversity_and_hrc_p_val = rounded_p_val,
+            finance_results_JSON = financial_scores_df.to_json()
+            )
 
 if __name__ == "__main__":
   os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
