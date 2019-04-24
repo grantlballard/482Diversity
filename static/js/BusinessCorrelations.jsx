@@ -133,11 +133,15 @@ class BusinessCorrelations extends React.Component {
         <div className={classes.scoresGeneratedContainer}>
           <div className="row">
             <div className="col-1">
-              <img
-                src="http://cdn.onlinewebfonts.com/svg/img_147474.png"
-                height="70"
-                width="70"
-              />
+              <a href="/methods">
+                <img
+                  src="http://cdn.onlinewebfonts.com/svg/img_147474.png"
+                  height="70"
+                  width="70"
+                  class="horizontal-centered"
+                  style={{ marginLeft: 8 }}
+                />
+              </a>
             </div>
             <div className="col-8">
               <h3 className="col-9 horizontal-centered">

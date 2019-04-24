@@ -6,7 +6,8 @@
 
 {% block custom_javascript %}
 <script>
-  var developerKey = "{{ DEVELOPER_KEY }}";
+  //DEVELOPER_KEY
+  var developerKey = "{{ AIzaSyBXw0iVqjQ0kwF1jx8QWaKGzdtM19lW7VE }}";
   // The Client ID obtained from the Google API Console. Replace with your own Client ID.
   var clientId = '130610955392-4nlg811kl98fc2etljlfrtf1e79jjp70.apps.googleusercontent.com';
 
@@ -70,7 +71,7 @@
   // A simple callback implementation.
   function pickerCallback(data) {
     var folderid = 'nothing';
-    var modified_time = 'nothing'; 
+    var modified_time = 'nothing';
     if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
       var doc = data[google.picker.Response.DOCUMENTS][0];
       folderid = doc[google.picker.Document.ID];
@@ -90,7 +91,7 @@
       }
     }
     http.send("folder=" + folderid + "&" +
-              "modified_time=" + modified_time);
+      "modified_time=" + modified_time);
 
 
 
@@ -136,7 +137,7 @@
   <div class="container">
     <div class="row justify-content-md-center">
       <div class="col col-md-auto">
-        <img style="padding-right: 15px" height="150px" src="{{ url_for('static', filename="img/google.png")}}"/>
+        <img style="padding-right: 15px" height="150px" src="{{ url_for('static', filename="img/google.png")}}" />
       </div>
       <div class="col col-md-auto d-flex align-content-md-center flex-wrap">
         <h4 style="font-size: 30px">
@@ -147,21 +148,21 @@
     <div class="row justify-content-md-center">
       <div class="col col-md-auto">
         <ol>
-        <li>Prepare your google drive by creating a new folder. </li>
-        <li>In this folder add the financial information, the diversity ditionary, and the </li>
-        documents that you wish to score.
-        <li>The scoring files must be named in the format compname_cusip_type.</li>
-        <li>The dictinoary and financial csvs must contain dict and finan in their titles.</li>
-        <li>Press the generate scores button and select the folder that you just set up.</li>
+          <li>Prepare your google drive by creating a new folder. </li>
+          <li>In this folder add the financial information, the diversity ditionary, and the </li>
+          documents that you wish to score.
+          <li>The scoring files must be named in the format compname_cusip_type.</li>
+          <li>The dictinoary and financial csvs must contain dict and finan in their titles.</li>
+          <li>Press the generate scores button and select the folder that you just set up.</li>
       </div>
     </div>
-     <form method="post" id="getscores" action="/results">
-          <input type="submit" style="display:none" name="submitbutton" value="Generate Scores">
-          <button type="button" id="auth" class="button-white center">Generate Scores</button>
+    <form method="post" id="getscores" action="/results">
+      <input type="submit" style="display:none" name="submitbutton" value="Generate Scores">
+      <button type="button" id="auth" class="button-white center">Generate Scores</button>
 
 
-          </input>
-        </form>
+      </input>
+    </form>
   </div>
 </div>
 {% endblock %}
